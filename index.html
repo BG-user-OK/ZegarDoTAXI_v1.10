@@ -190,11 +190,17 @@
     }
 
     .pot-btn{ background:linear-gradient(180deg,var(--btn-pot-off-1),var(--btn-pot-off-2)); }
-    .pot-btn.cooking-a{ background:linear-gradient(180deg,#1a1a00,#2a1a00); box-shadow:inset 0 0 0 1px rgba(218,165,32,.2), 0 0 14px rgba(218,165,32,.2); }
-    .pot-btn.cooking-b{ background:linear-gradient(180deg,#3a2a00,#daa520); box-shadow:inset 0 0 0 1px rgba(255,244,194,.3), 0 0 20px rgba(218,165,32,.45); }
-    .pot-btn.cooking-c{ background:linear-gradient(180deg,#fff4c2,#daa520); box-shadow:inset 0 0 0 1px rgba(255,244,194,.55), 0 0 24px rgba(255,244,194,.5); }
     .pot-btn.done-alarm{ background:linear-gradient(180deg,#ff5050,#ff3030); box-shadow:inset 0 0 0 1px rgba(255,200,200,.4), 0 0 30px rgba(255,48,48,.7); }
     .pot-btn.done-alarm-off{ background:linear-gradient(180deg,#3a0000,#1a0000); }
+    /* pasek ognia rosnący od dołu podczas grzania */
+    .pot-fire-bar{
+      position:absolute; bottom:0; left:0; right:0;
+      background:linear-gradient(0deg,#7a0000,#d42020);
+      border-radius:0 0 14px 14px;
+      z-index:1;
+      transition:height 0.8s linear;
+      pointer-events:none;
+    }
 
     .money-btn{ background:linear-gradient(180deg,var(--btn-money-1),var(--btn-money-2)); }
 
@@ -202,6 +208,7 @@
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
       pointer-events:none;
+      z-index:2;
     }
     .btn-inner.money-stack{ flex-direction:column; gap:2px; padding:4px; }
 
@@ -226,8 +233,7 @@
     .exercise-btn.alert .center-big,
     .exercise-btn.blink .center-big{ color:var(--exercise-text-alert); }
     .break-btn .center-big, .break-btn .mini-corner{ color:var(--break-text); }
-    .pot-btn .center-big{ color:#d5b04c; }
-    .pot-btn.cooking-b .center-big, .pot-btn.cooking-c .center-big{ color:#2a1a00; }
+    .pot-btn .center-big{ color:#fff; font-size:clamp(40px,11vw,64px); }
     .pot-btn.done-alarm .center-big, .pot-btn.done-alarm-off .center-big{ color:#fff; }
 
     .money-big{
@@ -525,10 +531,10 @@
 
       <button class="btn pot-btn" id="potBtn" type="button">
         <div class="edit-mini" id="openPotEditor" title="Ustaw czas">✎</div>
+        <div class="pot-fire-bar" id="potFireBar" style="height:0%"></div>
         <div class="btn-inner">
-          <div class="center-big" id="potCenter">20</div>
+          <div class="center-big" id="potCenter">🫕</div>
         </div>
-        <div class="emoji">🍲</div>
       </button>
 
       <button class="btn money-btn" id="moneyBtn" type="button">
@@ -544,7 +550,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.10</div>
+  <div class="version">v:1.11</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -656,6 +662,7 @@
     function formatHHMM(m){ m=((m%1440)+1440)%1440; return `${pad(Math.floor(m/60))}:${pad(m%60)}`; }
     function formatCompact(m){ m=Math.max(0,m); const h=Math.floor(m/60), mm=m%60; return h<=0?String(mm):`${h}:${pad(mm)}`; }
     function formatCompactSigned(m){ const s=m<0?'-':''; const a=Math.abs(m); const h=Math.floor(a/60), mm=a%60; return h<=0?s+String(mm):`${s}${h}:${pad(mm)}`; }
+    function minutesToHHMM(m){ m=Math.max(0,m); return pad(Math.floor(m/60))+':'+pad(m%60); }
     function diffMinutes(f,t){ let d=t-f; if(d<0) d+=1440; return d; }
     function clock720(m){ return m%720; }
     function angleFromMinutes(m){ return (clock720(m)/720)*360 - 90; }
@@ -901,23 +908,29 @@
     function renderPotButton(){
       const btn=document.getElementById('potBtn');
       const ctr=document.getElementById('potCenter');
-      btn.classList.remove('cooking-a','cooking-b','cooking-c','done-alarm','done-alarm-off');
+      const bar=document.getElementById('potFireBar');
+      btn.classList.remove('done-alarm','done-alarm-off');
 
       if(potStartedAt===null){
-        ctr.textContent=potDurationMin;
+        // spoczynek - duże 🫕 na środku, pasek zerowy
+        ctr.textContent='🫕';
+        if(bar) bar.style.height='0%';
         return;
       }
       const rem=potRemainingSeconds();
       if(rem>0){
-        const frame=Math.floor(Date.now()/500)%3;
-        btn.classList.add(frame===0?'cooking-a':frame===1?'cooking-b':'cooking-c');
+        // grzanie - pasek rośnie od dołu proporcjonalnie, liczba odlicza
+        const total=potDurationMin*60;
+        const pct=Math.min(100,((total-rem)/total)*100);
+        if(bar) bar.style.height=pct.toFixed(1)+'%';
         ctr.textContent=Math.ceil(rem/60);
       } else {
+        if(bar) bar.style.height='0%';
         if(!potAckedDone){
           btn.classList.add(blinkState?'done-alarm':'done-alarm-off');
           ctr.textContent='!';
         } else {
-          ctr.textContent=potDurationMin;
+          ctr.textContent='🫕';
           potStartedAt=null;
           potAckedDone=false;
         }
@@ -1167,6 +1180,16 @@
       }
       renderKeypad();
     }
+    function liveKmPreview(){
+      // oblicza przebieg na podstawie aktualnie wpisywanych cyfr licznika końcowego
+      const curEnd=parseInt(keypadCounterDigits.join(''),10);
+      if(counterStart===null) return '';
+      const km=curEnd - counterStart - privKmTotal;
+      const sign=km<0?'':'+';
+      // ujemny = więcej priv niż różnica końc-pocz, lub jeszcze nie dokończone cyfry
+      return `przebieg: ${km} km`;
+    }
+
     function renderKeypad(){
       let disp='', lab='';
       if(keypadMode==='amount'){
@@ -1182,6 +1205,9 @@
         <div class="big-panel" style="max-width:420px;">
           <div class="keypad-label">${lab}</div>
           <div class="keypad-display">${disp}</div>
+          ${keypadMode==='counter' && keypadContext.field==='end'
+            ? `<div style="text-align:center;font-size:17px;font-weight:700;color:#aaa;padding:2px 0 4px;">${liveKmPreview()}</div>`
+            : ''}
           <div class="keypad" style="flex:1;">
             <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
             <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
@@ -1402,8 +1428,8 @@
           date: workDate || todayISO(),
           start: startWorkMinutes!==null?formatHHMM(startWorkMinutes):'',
           end: endWorkMinutes!==null?formatHHMM(endWorkMinutes):'',
-          work_minutes: Math.max(0,net),
-          break_minutes: getTotalBreakMinutes(true),
+          work_duration: minutesToHHMM(Math.max(0,net)),
+          break_duration: minutesToHHMM(getTotalBreakMinutes(true)),
           counter_start: counterStart!==null?counterStart:'',
           counter_end: counterEnd!==null?counterEnd:'',
           km_priv: privKmTotal,
@@ -1536,11 +1562,8 @@
       if(startWorkMinutes!==null && lastExerciseMinutes!==null && getEffectiveExerciseElapsed()>60){
         renderRadarSweep();
       }
-      if(potStartedAt!==null && potRemainingSeconds()>0){
-        const btn=document.getElementById('potBtn');
-        const frame=Math.floor(Date.now()/500)%3;
-        btn.classList.remove('cooking-a','cooking-b','cooking-c');
-        btn.classList.add(frame===0?'cooking-a':frame===1?'cooking-b':'cooking-c');
+      if(potStartedAt!==null){
+        renderPotButton();
       }
     }, 100);
 
