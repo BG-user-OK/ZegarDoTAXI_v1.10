@@ -140,6 +140,240 @@
     .btn:active{ transform:scale(.985); }
     .btn.empty-slot{ background:#0a0a0a; box-shadow:inset 0 0 0 1px #1a1a1a; pointer-events:none; opacity:.3; }
 
+    /* === v1.12: long-press progress ring === */
+    .btn .lp-ring{
+      position:absolute; inset:0;
+      border-radius:16px;
+      pointer-events:none;
+      z-index:6;
+      opacity:0;
+      box-shadow:inset 0 0 0 0 rgba(255,255,255,0.85);
+      transition:opacity .15s ease;
+    }
+    .btn.lp-active .lp-ring{
+      opacity:1;
+      animation:lpFill 3s linear forwards;
+    }
+    @keyframes lpFill{
+      0%   { box-shadow:inset 0 0 0 0px rgba(80,200,255,0.0); }
+      30%  { box-shadow:inset 0 0 0 3px rgba(80,200,255,0.55); }
+      60%  { box-shadow:inset 0 0 0 5px rgba(120,220,255,0.75); }
+      100% { box-shadow:inset 0 0 0 8px rgba(255,255,255,0.95); }
+    }
+
+    /* === v1.12: edit-mini przekształcony w nieklikalną etykietę "✎ 3s" === */
+    .edit-hint{
+      position:absolute; top:6px; right:6px;
+      font-size:11px; font-weight:800;
+      color:rgba(255,255,255,.55);
+      background:rgba(0,0,0,.28);
+      padding:2px 6px;
+      border-radius:6px;
+      z-index:5;
+      pointer-events:none;
+      letter-spacing:.5px;
+    }
+
+    /* === v1.12: przycisk START/STOP - podział pionowy === */
+    .work-split{
+      position:absolute; inset:0;
+      display:grid;
+      grid-template-columns:1.2fr 1fr;
+      z-index:2;
+      pointer-events:none;
+    }
+    .work-left{
+      display:flex; flex-direction:column;
+      justify-content:space-between;
+      padding:8px 6px 8px 10px;
+    }
+    .work-time-top{
+      font-size:clamp(16px, 4.2vw, 22px);
+      font-weight:900;
+      color:rgba(255,255,255,.95);
+      letter-spacing:-.5px;
+      text-shadow:0 1px 0 rgba(0,0,0,.3);
+    }
+    .work-time-bot{
+      font-size:clamp(16px, 4.2vw, 22px);
+      font-weight:900;
+      color:rgba(255,255,255,.85);
+      letter-spacing:-.5px;
+    }
+    .work-icon-row{
+      display:flex; align-items:center;
+      gap:4px;
+      font-size:18px;
+      color:rgba(255,255,255,.85);
+    }
+    .work-right{
+      display:flex; align-items:center; justify-content:center;
+      padding:6px 6px 6px 0;
+    }
+    /* Rolka odhaczająca godziny */
+    .work-roller{
+      width:100%; height:78%;
+      background:rgba(0,0,0,.4);
+      border-radius:10px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),
+                 inset 0 0 8px rgba(0,0,0,.6);
+      position:relative; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .work-roller::before, .work-roller::after{
+      content:'▶';
+      position:absolute;
+      font-size:10px;
+      color:rgba(255,255,255,.6);
+      top:50%; transform:translateY(-50%);
+    }
+    .work-roller::before{ left:3px; }
+    .work-roller::after{ right:3px; content:'◀'; }
+    .work-roller-inner{
+      display:flex; flex-direction:column;
+      align-items:center;
+      transition:transform 0.6s cubic-bezier(.6,.05,.4,.95);
+      will-change:transform;
+    }
+    .work-roller-digit{
+      font-size:clamp(40px, 11vw, 64px);
+      font-weight:900;
+      line-height:1;
+      color:#f4ffe8;
+      letter-spacing:-1px;
+      height:1em;
+      display:flex; align-items:center; justify-content:center;
+      text-shadow:0 1px 0 rgba(0,0,0,.4);
+    }
+
+    /* === v1.12: przycisk obrotów - dwa banknoty (góra/dół) === */
+    .money-btn{
+      background:#0a0a0a;
+      padding:0;
+      overflow:hidden;
+    }
+    .money-split{
+      position:absolute; inset:0;
+      display:grid;
+      grid-template-rows:1fr 1fr;
+      gap:2px;
+      z-index:2;
+      pointer-events:none;
+    }
+    .money-cell{
+      position:relative;
+      display:flex; align-items:center; justify-content:center;
+      background-color:#1a1a1a;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      overflow:hidden;
+    }
+    .money-cell.empty{
+      background-image:none !important;
+    }
+    .money-cell-text{
+      font-size:clamp(22px, 6.4vw, 36px);
+      font-weight:900;
+      letter-spacing:-1px;
+      text-shadow:
+        0 0 4px rgba(0,0,0,.65),
+        0 1px 0 rgba(0,0,0,.5);
+      line-height:1;
+      padding:0 6px;
+      font-variant-numeric:tabular-nums;
+    }
+    /* Kolory liczb dopasowane do banknotu (ciemniejszy odcień bazowego) */
+    .money-cell.note-50  .money-cell-text{ color:#0a3a3f; }   /* 50zł szmaragd, ciemniejszy zielononiebieski */
+    .money-cell.note-100 .money-cell-text{ color:#28161a; }   /* 100zł brąz/sepia */
+    .money-cell.note-200 .money-cell-text{ color:#3a2106; }   /* 200zł oliwka/oker */
+    .money-cell.note-500 .money-cell-text{ color:#3a1a36; }   /* 500zł śliwka/fiolet */
+
+    /* moneta (przycisk dolny prawy zamiast empty-slot) */
+    .coin-btn{
+      background:#0a0a0a;
+      padding:0;
+      overflow:hidden;
+    }
+    .coin-cell{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      background-color:#1a1a1a;
+      background-size:contain;
+      background-position:center;
+      background-repeat:no-repeat;
+      z-index:2;
+    }
+    .coin-cell.empty{ background-image:none !important; }
+    .coin-cell-text{
+      font-size:clamp(22px, 6.4vw, 36px);
+      font-weight:900;
+      letter-spacing:-1px;
+      text-shadow:0 0 4px rgba(0,0,0,.6), 0 1px 0 rgba(0,0,0,.5);
+      font-variant-numeric:tabular-nums;
+    }
+    .coin-cell.coin-1 .coin-cell-text{ color:#7a7a7a; }   /* srebrny ciemniejszy na 1zł */
+    .coin-cell.coin-2 .coin-cell-text{ color:#7a5a18; }   /* złoty ciemniejszy na 2zł */
+    .coin-cell.coin-5 .coin-cell-text{ color:#5a4a1c; }   /* ciemne złoto na 5zł (środek żółty, otok srebrny) */
+
+    /* === v1.12: garnek "spał" po wykorzystaniu === */
+    .pot-btn.dimmed{
+      opacity:.45;
+    }
+
+    /* === v1.12: Animacja END - czerwona fala zalewająca tarczę + napis + odliczanie === */
+    .end-confirm-overlay{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      z-index:50;
+      pointer-events:auto;
+    }
+    .end-confirm-overlay.hidden{ display:none; }
+    .end-wave{
+      position:absolute;
+      left:50%; top:50%;
+      width:0; height:0;
+      background:radial-gradient(circle,#ff2828 0%,#a80000 70%,#5e0000 100%);
+      border-radius:50%;
+      transform:translate(-50%,-50%);
+      animation:endWaveExpand .55s ease-out forwards;
+      box-shadow:0 0 60px rgba(255,40,40,.7);
+    }
+    @keyframes endWaveExpand{
+      0%   { width:0; height:0; opacity:.6; }
+      100% { width:170%; height:170%; opacity:1; }
+    }
+    .end-confirm-content{
+      position:relative;
+      z-index:51;
+      text-align:center;
+      color:#fff;
+      opacity:0;
+      animation:endTextFade .35s .35s forwards;
+      padding:0 16px;
+    }
+    @keyframes endTextFade{ to{ opacity:1; } }
+    .end-confirm-title{
+      font-size:clamp(20px, 5.4vw, 30px);
+      font-weight:900;
+      letter-spacing:.5px;
+      line-height:1.1;
+      text-shadow:0 2px 6px rgba(0,0,0,.6);
+      margin-bottom:8px;
+    }
+    .end-confirm-counter{
+      font-size:clamp(72px, 22vw, 130px);
+      font-weight:900;
+      line-height:1;
+      text-shadow:0 4px 14px rgba(0,0,0,.7);
+    }
+    .end-confirm-hint{
+      font-size:clamp(13px, 3.4vw, 17px);
+      font-weight:700;
+      color:rgba(255,230,230,.92);
+      margin-top:6px;
+    }
+
     .work-btn{ background:linear-gradient(180deg,var(--btn-work-off-1),var(--btn-work-off-2)); }
     .work-btn.on{
       background:linear-gradient(180deg,var(--btn-work-on-1),var(--btn-work-on-2));
@@ -348,6 +582,16 @@
       letter-spacing:.5px; padding:0 10px;
       text-align:left; cursor:pointer;
     }
+    .prov-btn.prov-with-img{
+      padding:4px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .prov-img{
+      max-width:100%; max-height:100%;
+      width:auto; height:auto;
+      object-fit:contain;
+      pointer-events:none;
+    }
     .prov-amount{
       display:flex; align-items:center; justify-content:flex-end;
       padding:0 12px;
@@ -471,6 +715,14 @@
     <div class="notes-bar" id="notesBar"></div>
 
     <div class="clock-wrap">
+      <div class="end-confirm-overlay hidden" id="endConfirmOverlay">
+        <div class="end-wave"></div>
+        <div class="end-confirm-content">
+          <div class="end-confirm-title">POTWIERDŹ<br>KONIEC DNIÓWKI</div>
+          <div class="end-confirm-counter" id="endConfirmCounter">5</div>
+          <div class="end-confirm-hint">stuknij aby zakończyć</div>
+        </div>
+      </div>
       <svg class="clock-svg" viewBox="0 0 400 400" aria-hidden="true">
         <g id="workFill"></g>
         <g id="noExerciseFill"></g>
@@ -504,13 +756,22 @@
 
     <div class="controls">
       <button class="btn work-btn" id="workBtn" type="button">
-        <div class="edit-mini" id="openStartEditor" title="Edytuj start">✎</div>
-        <div class="mini-corner" id="workStartMini">--:--</div>
-        <div class="mini-corner-bottom" id="workEndMini"></div>
-        <div class="btn-inner">
-          <div class="center-big" id="workCenter">0</div>
+        <div class="lp-ring"></div>
+        <div class="edit-hint">✎ 3s</div>
+        <div class="work-split">
+          <div class="work-left">
+            <div class="work-time-top" id="workStartMini">--:--</div>
+            <div class="work-icon-row">🚕</div>
+            <div class="work-time-bot" id="workEndMini"></div>
+          </div>
+          <div class="work-right">
+            <div class="work-roller">
+              <div class="work-roller-inner" id="workRollerInner">
+                <div class="work-roller-digit">0</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="emoji">🚕</div>
       </button>
 
       <button class="btn exercise-btn" id="exerciseBtn" type="button">
@@ -521,7 +782,8 @@
       </button>
 
       <button class="btn break-btn" id="breakBtn" type="button">
-        <div class="edit-mini" id="openBreakEditor" title="Korekta przerwy">✎</div>
+        <div class="lp-ring"></div>
+        <div class="edit-hint">✎ 3s</div>
         <div class="mini-corner" id="breakSumMini"></div>
         <div class="btn-inner">
           <div class="center-big" id="breakCenter"></div>
@@ -530,7 +792,8 @@
       </button>
 
       <button class="btn pot-btn" id="potBtn" type="button">
-        <div class="edit-mini" id="openPotEditor" title="Ustaw czas">✎</div>
+        <div class="lp-ring"></div>
+        <div class="edit-hint">✎ 3s</div>
         <div class="pot-fire-bar" id="potFireBar" style="height:0%"></div>
         <div class="btn-inner">
           <div class="center-big" id="potCenter">🫕</div>
@@ -538,19 +801,26 @@
       </button>
 
       <button class="btn money-btn" id="moneyBtn" type="button">
-        <div class="btn-inner money-stack" id="moneyInner">
-          <div style="font-size:28px;opacity:.7;">💰</div>
+        <div class="money-split">
+          <div class="money-cell empty" id="moneyTop">
+            <div style="font-size:24px;opacity:.7;">💰</div>
+          </div>
+          <div class="money-cell empty" id="moneyBot"></div>
         </div>
       </button>
 
-      <button class="btn empty-slot" type="button" disabled></button>
+      <button class="btn coin-btn" id="coinBtn" type="button">
+        <div class="coin-cell empty" id="coinCell">
+          <div style="font-size:22px;opacity:.5;">🪙</div>
+        </div>
+      </button>
     </div>
   </div>
 
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.11</div>
+  <div class="version">v:1.12</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -581,6 +851,7 @@
     let potDurationMin = 20;
     let potStartedAt = null;
     let potAckedDone = false;
+    let potUsedToday = false;
 
     let revenues = {};
     PROVIDERS.forEach(p => revenues[p.key] = 0);
@@ -613,7 +884,7 @@
           startWorkMinutes, endWorkMinutes, lastExerciseMinutes,
           breakActive, currentBreakStart, breakSegments,
           exerciseMarkers, breakAdjustMinutes, workDate,
-          potDurationMin, potStartedAt, potAckedDone,
+          potDurationMin, potStartedAt, potAckedDone, potUsedToday,
           revenues, counterStart, counterEnd, privKmTotal
         };
         localStorage.setItem(LS_KEY, JSON.stringify(state));
@@ -638,6 +909,7 @@
           potDurationMin = s.potDurationMin ?? 20;
           potStartedAt = s.potStartedAt ?? null;
           potAckedDone = !!s.potAckedDone;
+          potUsedToday = !!s.potUsedToday;
           if(s.revenues){
             PROVIDERS.forEach(p => revenues[p.key] = s.revenues[p.key] || 0);
           }
@@ -854,7 +1126,6 @@
       const workBtn=document.getElementById('workBtn');
       const workStartMini=document.getElementById('workStartMini');
       const workEndMini=document.getElementById('workEndMini');
-      const workCenter=document.getElementById('workCenter');
       const exBtn=document.getElementById('exerciseBtn');
       const exCenter=document.getElementById('exerciseCenter');
       const breakSumMini=document.getElementById('breakSumMini');
@@ -863,22 +1134,22 @@
       if(startWorkMinutes===null){
         workStartMini.textContent='--:--';
         workEndMini.textContent='';
-        workCenter.textContent='0';
         exCenter.textContent='0';
         breakSumMini.textContent='';
         breakCenter.textContent='';
         workBtn.classList.remove('overtime');
+        renderWorkRoller(0);
       } else {
         const net=getNetWorkMinutes();
         const ex=getEffectiveExerciseElapsed();
         const totalBreak=getTotalBreakMinutes(true);
         workStartMini.textContent=formatHHMM(startWorkMinutes);
         workEndMini.textContent=endWorkMinutes!==null?formatHHMM(endWorkMinutes):'';
-        workCenter.textContent=formatCompact(Math.max(0,net));
         exCenter.textContent=formatCompact(ex);
         breakSumMini.textContent=totalBreak!==0?formatCompactSigned(totalBreak):'';
         breakCenter.textContent=breakActive?formatCompact(getActiveBreakMinutes()):'';
         workBtn.classList.toggle('overtime', net>480);
+        renderWorkRoller(Math.max(0,net));
       }
 
       exBtn.classList.remove('alert','blink');
@@ -899,6 +1170,33 @@
       renderNotesBar();
     }
 
+    // === Rolka cyfr godzin pracy ===
+    // pokazuje stale aktualną cyfrę godzin (0..9) z proporcjonalnym przesunięciem zgodnie z minutami
+    // np. 4h32min => cyfra 4 jest podniesiona o 32/60 wysokości w stronę 5
+    function renderWorkRoller(workMinutes){
+      const inner=document.getElementById('workRollerInner');
+      if(!inner) return;
+      const totalH = workMinutes / 60;          // np 4.533
+      const intH = Math.floor(totalH);          // 4
+      const frac = totalH - intH;               // 0.533
+      // wybudujmy listę cyfr 0..9 jako wiersze rolki
+      // wymiar pojedynczej cyfry = 1em wg CSS, ale przeliczamy w pikselach
+      // Najprościej: dynamiczne ustawienie translate w em jednostkach
+      // strategy: render 0..9 ; translate = -(intH + frac) em
+      if(inner.dataset.built !== '1'){
+        inner.innerHTML='';
+        for(let i=0;i<=9;i++){
+          const d=document.createElement('div');
+          d.className='work-roller-digit';
+          d.textContent=i;
+          inner.appendChild(d);
+        }
+        inner.dataset.built='1';
+      }
+      const offset = (intH + frac);   // ile em w górę
+      inner.style.transform=`translateY(-${offset}em)`;
+    }
+
     function potRemainingSeconds(){
       if(potStartedAt===null) return null;
       const el=(Date.now()-potStartedAt)/1000;
@@ -909,30 +1207,39 @@
       const btn=document.getElementById('potBtn');
       const ctr=document.getElementById('potCenter');
       const bar=document.getElementById('potFireBar');
-      btn.classList.remove('done-alarm','done-alarm-off');
+      btn.classList.remove('done-alarm','done-alarm-off','dimmed');
 
       if(potStartedAt===null){
-        // spoczynek - duże 🫕 na środku, pasek zerowy
+        // spoczynek - duże 🫕 na środku
         ctr.textContent='🫕';
         if(bar) bar.style.height='0%';
+        // jeśli już dziś grzał - subtelnie przygaszony
+        if(potUsedToday) btn.classList.add('dimmed');
         return;
       }
       const rem=potRemainingSeconds();
+      const totalSec=potDurationMin*60;
+      const elapsedSec=totalSec - rem;
       if(rem>0){
-        // grzanie - pasek rośnie od dołu proporcjonalnie, liczba odlicza
-        const total=potDurationMin*60;
-        const pct=Math.min(100,((total-rem)/total)*100);
+        // grzanie - pasek rośnie od dołu, liczba odlicza w dół
+        const pct=Math.min(100,(elapsedSec/totalSec)*100);
         if(bar) bar.style.height=pct.toFixed(1)+'%';
         ctr.textContent=Math.ceil(rem/60);
       } else {
-        if(bar) bar.style.height='0%';
+        // czas minął, grzanie nadal trwa do potwierdzenia, licznik liczy w górę CAŁOŚCIOWO
+        if(bar) bar.style.height='100%';
         if(!potAckedDone){
           btn.classList.add(blinkState?'done-alarm':'done-alarm-off');
-          ctr.textContent='!';
+          // pokaż łączny czas grzania w minutach
+          const totalMin=Math.ceil(elapsedSec/60);
+          ctr.textContent=totalMin;
         } else {
+          // potwierdzono wyłączenie - resetujemy timer ale flagujemy że dziś już grzał
           ctr.textContent='🫕';
           potStartedAt=null;
           potAckedDone=false;
+          potUsedToday=true;
+          btn.classList.add('dimmed');
         }
       }
     }
@@ -940,39 +1247,93 @@
     function getTotalRevenueGroszy(){ let s=0; for(const p of PROVIDERS) s+=revenues[p.key]||0; return s; }
 
     function renderMoneyButton(){
-      const inner=document.getElementById('moneyInner');
-      clearChildren(inner);
+      const moneyTop=document.getElementById('moneyTop');
+      const moneyBot=document.getElementById('moneyBot');
+      const coinCell=document.getElementById('coinCell');
+
+      // === górny banknot: SUMA OBROTÓW ===
+      moneyTop.classList.remove('note-50','note-100','note-200','note-500','empty');
+      moneyTop.style.backgroundImage='';
+      clearChildren(moneyTop);
+
       const total=getTotalRevenueGroszy();
       if(total<=0){
+        moneyTop.classList.add('empty');
         const em=document.createElement('div');
-        em.style.fontSize='28px'; em.style.opacity='.7';
+        em.style.fontSize='24px'; em.style.opacity='.7';
         em.textContent='💰';
-        inner.appendChild(em);
-        return;
+        moneyTop.appendChild(em);
+      } else {
+        const totalInt=Math.floor(total/100);
+        let noteCls='note-100', noteFile='100zl.png';
+        if(totalInt < 100){ noteCls='note-50';  noteFile='50zl.png'; }
+        else if(totalInt < 200){ noteCls='note-100'; noteFile='100zl.png'; }
+        else if(totalInt < 400){ noteCls='note-200'; noteFile='200zl.png'; }
+        else { noteCls='note-500'; noteFile='500zl.png'; }
+        moneyTop.classList.add(noteCls);
+        moneyTop.style.backgroundImage=`url('Photos/${noteFile}')`;
+        const t=document.createElement('div');
+        t.className='money-cell-text';
+        t.textContent=totalInt;
+        moneyTop.appendChild(t);
       }
-      const totalInt=Math.floor(total/100);
-      const big=document.createElement('div');
-      big.className='money-big';
-      big.textContent=totalInt;
-      inner.appendChild(big);
+
+      // === dolny banknot: zł/h ===
+      moneyBot.classList.remove('note-50','note-100','note-200','note-500','empty');
+      moneyBot.style.backgroundImage='';
+      clearChildren(moneyBot);
 
       const net=Math.max(0,getNetWorkMinutes());
-      if(net>0){
+      if(total>0 && net>0){
+        const totalInt=Math.floor(total/100);
         const per=Math.round(totalInt*60/net);
-        const d=document.createElement('div');
-        d.className='money-mid';
-        d.innerHTML=`⏱ ${per}`;
-        inner.appendChild(d);
+        let noteCls='note-100', noteFile='100zl.png';
+        if(per < 100){ noteCls='note-50'; noteFile='50zl.png'; }
+        else if(per < 200){ noteCls='note-100'; noteFile='100zl.png'; }
+        else { noteCls='note-200'; noteFile='200zl.png'; }
+        moneyBot.classList.add(noteCls);
+        moneyBot.style.backgroundImage=`url('Photos/${noteFile}')`;
+        const t=document.createElement('div');
+        t.className='money-cell-text';
+        t.textContent=per;
+        moneyBot.appendChild(t);
+      } else {
+        moneyBot.classList.add('empty');
       }
-      if(counterStart!==null && counterEnd!==null){
+
+      // === moneta: zł/km ===
+      coinCell.classList.remove('coin-1','coin-2','coin-5','empty');
+      coinCell.style.backgroundImage='';
+      clearChildren(coinCell);
+
+      if(total>0 && counterStart!==null && counterEnd!==null){
         const km=counterEnd-counterStart-privKmTotal;
         if(km>0){
-          const pk=(totalInt/km).toFixed(2);
-          const d=document.createElement('div');
-          d.className='money-small';
-          d.innerHTML=`🛣 ${pk}`;
-          inner.appendChild(d);
+          const totalInt=Math.floor(total/100);
+          const perKm=totalInt/km;
+          let coinCls='coin-2', coinFile='2zl.png';
+          if(perKm < 1.6){ coinCls='coin-1'; coinFile='1zl.png'; }
+          else if(perKm < 4.0){ coinCls='coin-2'; coinFile='2zl.png'; }
+          else { coinCls='coin-5'; coinFile='5zl.png'; }
+          coinCell.classList.add(coinCls);
+          coinCell.style.backgroundImage=`url('Photos/${coinFile}')`;
+          const t=document.createElement('div');
+          t.className='coin-cell-text';
+          t.textContent=perKm.toFixed(2);
+          coinCell.appendChild(t);
+        } else {
+          coinCell.classList.add('empty');
+          const em=document.createElement('div');
+          em.style.fontSize='22px'; em.style.opacity='.5';
+          em.textContent='🪙';
+          coinCell.appendChild(em);
         }
+      } else {
+        coinCell.classList.add('empty');
+        const em=document.createElement('div');
+        em.style.fontSize='22px'; em.style.opacity='.5';
+        em.textContent='🪙';
+        coinCell.appendChild(em);
       }
     }
 
@@ -1104,9 +1465,15 @@
       for(const p of PROVIDERS){
         const v=revenues[p.key]||0;
         const disp=v>0?formatAmountDisplay(v):'—';
+        // Obrazek dostawcy z Photos/<klucz>.png; jeśli nie istnieje – pokaże tekst (onerror)
+        const imgSrc = `Photos/${p.key}.png`;
         rows += `
           <div class="provider-row">
-            <button class="prov-btn" data-prov="${p.key}" style="background:${p.bg};color:${p.fg};">${p.label}</button>
+            <button class="prov-btn prov-with-img" data-prov="${p.key}" style="background:${p.bg};color:${p.fg};">
+              <img src="${imgSrc}" alt="${p.label}" class="prov-img"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+              <span class="prov-fallback" style="display:none;">${p.label}</span>
+            </button>
             <div class="prov-amount ${v>0?'':'empty'}">${disp}</div>
           </div>`;
       }
@@ -1413,6 +1780,7 @@
       workDate=null;
       PROVIDERS.forEach(p=>revenues[p.key]=0);
       counterStart=null; counterEnd=null; privKmTotal=0;
+      potUsedToday=false;
     }
 
     async function doExport(url){
@@ -1464,12 +1832,129 @@
     }
 
     // ===== event listeners =====
-    document.getElementById('workBtn').addEventListener('click', ()=>{
-      if(startWorkMinutes!==null && endWorkMinutes===null) endWork();
-      else setWorkStart(nowMinutes(), false);
+
+    // === Helper: setup long-press na przycisku z akcją 3s + akcja na zwykły click ===
+    // - clickAction: krótki klik (uruchomić tylko jeśli długi nie odpalił)
+    // - longAction: 3s przytrzymanie
+    // - canTrigger: opcjonalna funkcja dopuszczalności (np. nie wchodź w edycję gdy END-confirm)
+    function setupLongPress(btn, clickAction, longAction, canTrigger){
+      let pressTimer = null;
+      let pressStarted = 0;
+      let longFired = false;
+      let cancelled = false;
+
+      function start(e){
+        if(canTrigger && !canTrigger(e)) return;
+        if(e && e.target && e.target.closest && e.target.closest('.edit-hint')){ /* hint nie blokuje, jest pointer-events:none, ale zachowawczo */ }
+        cancelled = false;
+        longFired = false;
+        pressStarted = Date.now();
+        btn.classList.add('lp-active');
+        if(navigator.vibrate){ try{ navigator.vibrate([15]); }catch(e){} }
+        pressTimer = setTimeout(()=>{
+          if(cancelled) return;
+          longFired = true;
+          if(navigator.vibrate){ try{ navigator.vibrate([60,40,60]); }catch(e){} }
+          btn.classList.remove('lp-active');
+          longAction();
+        }, 3000);
+      }
+      function endPress(){
+        clearTimeout(pressTimer);
+        btn.classList.remove('lp-active');
+        if(longFired) return;
+        if(cancelled) return;
+        // krótki klik - uruchom tylko jeśli upłynęło < 3s i nie był to longpress
+        clickAction();
+      }
+      function cancel(){
+        cancelled = true;
+        clearTimeout(pressTimer);
+        btn.classList.remove('lp-active');
+      }
+
+      btn.addEventListener('pointerdown', (e)=>{ start(e); });
+      btn.addEventListener('pointerup',   (e)=>{ endPress(); });
+      btn.addEventListener('pointerleave',(e)=>{ cancel(); });
+      btn.addEventListener('pointercancel',(e)=>{ cancel(); });
+    }
+
+    // === Animacja END - czerwona fala + odliczanie 5s ===
+    let endConfirmActive = false;
+    let endConfirmTimer = null;
+    let endConfirmInterval = null;
+
+    function startEndConfirm(){
+      if(endConfirmActive) return;
+      endConfirmActive = true;
+      const ov = document.getElementById('endConfirmOverlay');
+      const ctr = document.getElementById('endConfirmCounter');
+      ov.classList.remove('hidden');
+      // restart animacji fali (re-trigger)
+      const wave = ov.querySelector('.end-wave');
+      wave.style.animation='none';
+      wave.offsetHeight;
+      wave.style.animation='';
+
+      let secs = 5;
+      ctr.textContent = secs;
+      if(navigator.vibrate){ try{ navigator.vibrate([40,40,40]); }catch(e){} }
+
+      endConfirmInterval = setInterval(()=>{
+        secs--;
+        if(secs <= 0){
+          ctr.textContent = '0';
+          cancelEndConfirm();
+        } else {
+          ctr.textContent = secs;
+        }
+      }, 1000);
+
+      endConfirmTimer = setTimeout(()=>{
+        cancelEndConfirm();
+      }, 5000);
+    }
+    function cancelEndConfirm(){
+      endConfirmActive = false;
+      clearTimeout(endConfirmTimer);
+      clearInterval(endConfirmInterval);
+      const ov = document.getElementById('endConfirmOverlay');
+      ov.classList.add('hidden');
+    }
+    function confirmEndAndFinish(){
+      cancelEndConfirm();
+      endWork();
+    }
+
+    // klik w nakładkę = potwierdzenie
+    document.getElementById('endConfirmOverlay').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      confirmEndAndFinish();
     });
-    document.getElementById('openStartEditor').addEventListener('click',(e)=>{ e.stopPropagation(); openTimeEditor('start'); });
-    document.getElementById('openBreakEditor').addEventListener('click',(e)=>{ e.stopPropagation(); openTimeEditor('breakAdjust'); });
+
+    // === WORK button ===
+    setupLongPress(
+      document.getElementById('workBtn'),
+      // krótki klik
+      ()=>{
+        if(endConfirmActive){
+          // klik gdy się pokazuje "POTWIERDŹ" → potwierdzenie
+          confirmEndAndFinish();
+          return;
+        }
+        if(startWorkMinutes!==null && endWorkMinutes===null){
+          // praca trwa - włącz zabezpieczenie zamiast od razu kończyć
+          startEndConfirm();
+        } else {
+          // brak pracy lub już zakończona - start nowej
+          setWorkStart(nowMinutes(), false);
+        }
+      },
+      // długi klik 3s = edycja godziny startu
+      ()=> openTimeEditor('start')
+    );
+
+    // === EXERCISE - bez long-press ===
     document.getElementById('exerciseBtn').addEventListener('click', ()=>{
       if(startWorkMinutes===null || endWorkMinutes!==null) return;
       const now=nowMinutes();
@@ -1480,30 +1965,55 @@
       setTimeout(()=>{ b.classList.remove('flash'); renderAll(); }, 2300);
       saveState(); renderAll();
     });
-    document.getElementById('breakBtn').addEventListener('click',(e)=>{
-      if(e.target.closest('.edit-mini')) return;
-      if(startWorkMinutes===null || endWorkMinutes!==null) return;
-      const now=nowMinutes();
-      if(!breakActive){ breakActive=true; currentBreakStart=now; }
-      else {
-        breakActive=false;
-        if(currentBreakStart!==null) breakSegments.push({ start:currentBreakStart, end:now });
-        currentBreakStart=null;
-      }
-      saveState(); renderAll();
-    });
-    document.getElementById('potBtn').addEventListener('click',(e)=>{
-      if(e.target.closest('.edit-mini')) return;
-      if(potStartedAt===null){ potStartedAt=Date.now(); potAckedDone=false; }
-      else {
-        const rem=potRemainingSeconds();
-        if(rem>0){ potStartedAt=null; potAckedDone=false; }
-        else { potAckedDone=true; potStartedAt=null; }
-      }
-      saveState(); renderAll();
-    });
-    document.getElementById('openPotEditor').addEventListener('click',(e)=>{ e.stopPropagation(); openTimeEditor('pot'); });
+
+    // === BREAK ===
+    setupLongPress(
+      document.getElementById('breakBtn'),
+      // krótki klik
+      ()=>{
+        if(startWorkMinutes===null || endWorkMinutes!==null) return;
+        const now=nowMinutes();
+        if(!breakActive){ breakActive=true; currentBreakStart=now; }
+        else {
+          breakActive=false;
+          if(currentBreakStart!==null) breakSegments.push({ start:currentBreakStart, end:now });
+          currentBreakStart=null;
+        }
+        saveState(); renderAll();
+      },
+      // długi klik = korekta sumy przerw
+      ()=> openTimeEditor('breakAdjust')
+    );
+
+    // === POT ===
+    setupLongPress(
+      document.getElementById('potBtn'),
+      // krótki klik
+      ()=>{
+        if(potStartedAt===null){
+          potStartedAt=Date.now();
+          potAckedDone=false;
+        } else {
+          const rem=potRemainingSeconds();
+          if(rem>0){
+            // przerwanie grzania w trakcie
+            potStartedAt=null;
+            potAckedDone=false;
+          } else {
+            // alarm - potwierdzenie wyłączenia grzania
+            potAckedDone=true;
+          }
+        }
+        saveState(); renderAll();
+      },
+      // długi klik = ustaw czas grzania
+      ()=> openTimeEditor('pot')
+    );
+
+    // === MONEY === (otwarcie panelu obrotów)
     document.getElementById('moneyBtn').addEventListener('click', ()=> openMoneyPanel());
+    // === COIN === (też otwiera panel obrotów - to ten sam panel)
+    document.getElementById('coinBtn').addEventListener('click', ()=> openMoneyPanel());
 
     // trick: 3x puk w wersję = konfiguracja URL Apps Script
     let vt=0, vtT=null;
