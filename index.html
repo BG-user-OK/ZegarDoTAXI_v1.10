@@ -77,6 +77,9 @@
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+    button, .btn, .ok-btn, .cancel-btn, .delete-btn, .arrow-btn, .prov-btn, .counter-edit, .note-sticker, .keypad button {
+      touch-action: manipulation;
+    }
     html,body{ margin:0; padding:0; width:100%; height:100%; background:#000; color:var(--txt); font-family:Arial, Helvetica, sans-serif; overflow:hidden; }
     body{ display:flex; align-items:center; justify-content:center; }
 
@@ -206,51 +209,79 @@
       font-size:18px;
       color:rgba(255,255,255,.85);
     }
+    /* Rolka odhaczająca godziny */
     .work-right{
       display:flex; align-items:center; justify-content:center;
       padding:6px 6px 6px 0;
+      position:relative;
     }
-    /* Rolka odhaczająca godziny */
     .work-roller{
-      width:100%; height:78%;
-      background:rgba(0,0,0,.4);
-      border-radius:10px;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),
-                 inset 0 0 8px rgba(0,0,0,.6);
-      position:relative; overflow:hidden;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .work-roller::before, .work-roller::after{
-      content:'▶';
       position:absolute;
-      font-size:10px;
-      color:rgba(255,255,255,.6);
-      top:50%; transform:translateY(-50%);
+      top:50%; left:6%; right:6%;
+      transform:translateY(-50%);
+      height:80%;
+      background:rgba(0,0,0,.55);
+      border-radius:8px;
+      box-shadow:inset 0 0 0 1px rgba(56,200,102,.22),
+                 inset 0 0 10px rgba(0,0,0,.7);
+      overflow:hidden;
+      -webkit-mask-image:linear-gradient(180deg,
+        transparent 0%, rgba(0,0,0,.45) 18%,
+        black 38%, black 62%,
+        rgba(0,0,0,.45) 82%, transparent 100%);
+      mask-image:linear-gradient(180deg,
+        transparent 0%, rgba(0,0,0,.45) 18%,
+        black 38%, black 62%,
+        rgba(0,0,0,.45) 82%, transparent 100%);
     }
-    .work-roller::before{ left:3px; }
-    .work-roller::after{ right:3px; content:'◀'; }
     .work-roller-inner{
       display:flex; flex-direction:column;
       align-items:center;
-      transition:transform 0.6s cubic-bezier(.6,.05,.4,.95);
+      position:absolute;
+      top:0; left:0; right:0;
+      transition:transform 0.6s ease;
       will-change:transform;
     }
     .work-roller-digit{
-      font-size:clamp(40px, 11vw, 64px);
-      font-weight:900;
-      line-height:1;
-      color:#f4ffe8;
-      letter-spacing:-1px;
-      height:1em;
+      width:100%;
+      flex:0 0 auto;
       display:flex; align-items:center; justify-content:center;
-      text-shadow:0 1px 0 rgba(0,0,0,.4);
+      font-weight:900;
+      color:#f4ffe8;
+      text-shadow:0 1px 0 rgba(0,0,0,.5);
+      border-bottom:1px solid rgba(56,200,102,.32);
+      box-sizing:border-box;
+      /* font-size i height ustawia JS dynamicznie */
+    }
+    /* znaczniki na środku rolki - lewy i prawy */
+    .work-roller-mark-left,
+    .work-roller-mark-right{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:0; height:0;
+      border-style:solid;
+      z-index:10;
+      pointer-events:none;
+      filter:drop-shadow(0 0 3px rgba(88,232,120,.85));
+    }
+    .work-roller-mark-left{
+      left:-1px;
+      border-width:5px 0 5px 8px;
+      border-color:transparent transparent transparent #58e878;
+    }
+    .work-roller-mark-right{
+      right:-1px;
+      border-width:5px 8px 5px 0;
+      border-color:transparent #58e878 transparent transparent;
     }
 
     /* === v1.12: przycisk obrotów - dwa banknoty (góra/dół) === */
     .money-btn{
-      background:#0a0a0a;
+      background:#000;
       padding:0;
       overflow:hidden;
+      border-radius:0;
     }
     .money-split{
       position:absolute; inset:0;
@@ -263,42 +294,64 @@
     .money-cell{
       position:relative;
       display:flex; align-items:center; justify-content:center;
-      background-color:#1a1a1a;
-      background-size:cover;
+      background-color:#000;
+      background-size:contain;
       background-position:center;
       background-repeat:no-repeat;
       overflow:hidden;
+      border-radius:0;
     }
     .money-cell.empty{
       background-image:none !important;
     }
     .money-cell-text{
-      font-size:clamp(22px, 6.4vw, 36px);
+      display:inline-block;
+      width:auto;
+      font-size:clamp(28px, 9vw, 48px);
       font-weight:900;
-      letter-spacing:-1px;
-      text-shadow:
-        0 0 4px rgba(0,0,0,.65),
-        0 1px 0 rgba(0,0,0,.5);
+      text-align:center;
       line-height:1;
-      padding:0 6px;
+      padding:0;
       font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+      /* offsety per-banknot - okienko nie jest idealnie na środku obrazka */
+      transform:translate(var(--note-tx, 0%), var(--note-ty, 0%));
     }
-    /* Kolory liczb dopasowane do banknotu (ciemniejszy odcień bazowego) */
-    .money-cell.note-50  .money-cell-text{ color:#0a3a3f; }   /* 50zł szmaragd, ciemniejszy zielononiebieski */
-    .money-cell.note-100 .money-cell-text{ color:#28161a; }   /* 100zł brąz/sepia */
-    .money-cell.note-200 .money-cell-text{ color:#3a2106; }   /* 200zł oliwka/oker */
-    .money-cell.note-500 .money-cell-text{ color:#3a1a36; }   /* 500zł śliwka/fiolet */
+    /* Kolory liczb dopasowane do banknotu + biała poświata żeby ciemne było widoczne */
+    .money-cell.note-50  .money-cell-text{
+      color:#0a1c4a;          /* 50zł niebieski → ciemny granat */
+      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+    }
+    .money-cell.note-100 .money-cell-text{
+      color:#0d3a18;          /* 100zł zielony → ciemna zieleń */
+      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+    }
+    .money-cell.note-200 .money-cell-text{
+      color:#5a3a08;          /* 200zł złoty → ciemny złoty */
+      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+    }
+    .money-cell.note-500 .money-cell-text{
+      color:#2a1845;          /* 500zł brązowo-fioletowy → ciemny granat */
+      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+    }
+    /* Per-banknot offsety. Komórka ma center, więc tekst startuje w środku.
+       Wartości są procentami szerokości tekstu (translate %). Dostroimy obserwując. */
+    .money-cell.note-50  { --note-tx:8%;  --note-ty:0%; }   /* 50: okienko trochę w prawo */
+    .money-cell.note-100 { --note-tx:8%;  --note-ty:0%; }
+    .money-cell.note-200 { --note-tx:8%;  --note-ty:0%; }
+    .money-cell.note-500 { --note-tx:8%;  --note-ty:0%; }
 
-    /* moneta (przycisk dolny prawy zamiast empty-slot) */
+    /* moneta (przycisk dolny prawy) */
     .coin-btn{
-      background:#0a0a0a;
+      background:#000;
       padding:0;
       overflow:hidden;
+      border-radius:0;
     }
     .coin-cell{
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
-      background-color:#1a1a1a;
+      background-color:#000;
       background-size:contain;
       background-position:center;
       background-repeat:no-repeat;
@@ -306,15 +359,25 @@
     }
     .coin-cell.empty{ background-image:none !important; }
     .coin-cell-text{
-      font-size:clamp(22px, 6.4vw, 36px);
+      font-size:clamp(20px, 5.6vw, 32px);
       font-weight:900;
-      letter-spacing:-1px;
-      text-shadow:0 0 4px rgba(0,0,0,.6), 0 1px 0 rgba(0,0,0,.5);
+      text-align:center;
+      line-height:1;
       font-variant-numeric:tabular-nums;
+      white-space:nowrap;
     }
-    .coin-cell.coin-1 .coin-cell-text{ color:#7a7a7a; }   /* srebrny ciemniejszy na 1zł */
-    .coin-cell.coin-2 .coin-cell-text{ color:#7a5a18; }   /* złoty ciemniejszy na 2zł */
-    .coin-cell.coin-5 .coin-cell-text{ color:#5a4a1c; }   /* ciemne złoto na 5zł (środek żółty, otok srebrny) */
+    .coin-cell.coin-1 .coin-cell-text{
+      color:#3a3a3a;
+      text-shadow:0 0 3px rgba(255,255,255,.85);
+    }
+    .coin-cell.coin-2 .coin-cell-text{
+      color:#5e3f08;
+      text-shadow:0 0 3px rgba(255,255,255,.85);
+    }
+    .coin-cell.coin-5 .coin-cell-text{
+      color:#3a2a06;
+      text-shadow:0 0 3px rgba(255,255,255,.85);
+    }
 
     /* === v1.12: garnek "spał" po wykorzystaniu === */
     .pot-btn.dimmed{
@@ -468,7 +531,15 @@
     .exercise-btn.blink .center-big{ color:var(--exercise-text-alert); }
     .break-btn .center-big, .break-btn .mini-corner{ color:var(--break-text); }
     .pot-btn .center-big{ color:#fff; font-size:clamp(40px,11vw,64px); }
-    .pot-btn.done-alarm .center-big, .pot-btn.done-alarm-off .center-big{ color:#fff; }
+    /* alarm po grzaniu - cyfra ciemnoczerwona z mocną białą poświatą */
+    .pot-btn.done-alarm .center-big,
+    .pot-btn.done-alarm-off .center-big{
+      color:#5e0e0e;
+      text-shadow:
+        0 0 10px rgba(255,255,255,1),
+        0 0 5px rgba(255,255,255,1),
+        0 1px 0 rgba(255,255,255,.6);
+    }
 
     .money-big{
       font-size:clamp(34px, 9vw, 54px);
@@ -577,20 +648,30 @@
       gap:6px; min-height:46px;
     }
     .prov-btn{
+      position:relative;
       border:none; border-radius:10px;
       font-size:18px; font-weight:900;
-      letter-spacing:.5px; padding:0 10px;
-      text-align:left; cursor:pointer;
-    }
-    .prov-btn.prov-with-img{
-      padding:4px;
+      letter-spacing:.5px;
+      padding:0 10px;
       display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      overflow:hidden;
+      text-align:center;
     }
     .prov-img{
-      max-width:100%; max-height:100%;
-      width:auto; height:auto;
+      position:absolute;
+      inset:4px;
+      max-width:calc(100% - 8px);
+      max-height:calc(100% - 8px);
       object-fit:contain;
       pointer-events:none;
+      display:none;
+    }
+    .prov-btn.has-img .prov-img{ display:block; }
+    .prov-btn.has-img .prov-label{ display:none; }
+    .prov-label{
+      position:relative;
+      z-index:1;
     }
     .prov-amount{
       display:flex; align-items:center; justify-content:flex-end;
@@ -820,7 +901,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.12</div>
+  <div class="version">v:1.13</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1171,30 +1252,56 @@
     }
 
     // === Rolka cyfr godzin pracy ===
-    // pokazuje stale aktualną cyfrę godzin (0..9) z proporcjonalnym przesunięciem zgodnie z minutami
-    // np. 4h32min => cyfra 4 jest podniesiona o 32/60 wysokości w stronę 5
+    // Strategia: wysokość okna rolki = clientHeight w px. Każda cyfra ma tę samą
+    // wysokość. translateY = -(intH+frac) * h. Cyfry 10..20 mają mniejszy font,
+    // żeby zmieściły się dwucyfrowe.
     function renderWorkRoller(workMinutes){
-      const inner=document.getElementById('workRollerInner');
-      if(!inner) return;
-      const totalH = workMinutes / 60;          // np 4.533
-      const intH = Math.floor(totalH);          // 4
-      const frac = totalH - intH;               // 0.533
-      // wybudujmy listę cyfr 0..9 jako wiersze rolki
-      // wymiar pojedynczej cyfry = 1em wg CSS, ale przeliczamy w pikselach
-      // Najprościej: dynamiczne ustawienie translate w em jednostkach
-      // strategy: render 0..9 ; translate = -(intH + frac) em
+      const roller = document.querySelector('#workBtn .work-roller');
+      const inner = document.getElementById('workRollerInner');
+      if(!roller || !inner) return;
+
+      // Lazy build: cyfry 0..20 + znaczniki ◀ ▶ na rolce
       if(inner.dataset.built !== '1'){
         inner.innerHTML='';
-        for(let i=0;i<=9;i++){
-          const d=document.createElement('div');
-          d.className='work-roller-digit';
-          d.textContent=i;
+        for(let i=0; i<=20; i++){
+          const d = document.createElement('div');
+          d.className = 'work-roller-digit' + (i>=10 ? ' two-digit' : '');
+          d.textContent = i;
           inner.appendChild(d);
+        }
+        if(!roller.querySelector('.work-roller-mark-left')){
+          const ml = document.createElement('div');
+          ml.className = 'work-roller-mark-left';
+          roller.appendChild(ml);
+          const mr = document.createElement('div');
+          mr.className = 'work-roller-mark-right';
+          roller.appendChild(mr);
         }
         inner.dataset.built='1';
       }
-      const offset = (intH + frac);   // ile em w górę
-      inner.style.transform=`translateY(-${offset}em)`;
+
+      const h = roller.clientHeight;
+      if(!h) return;  // jeszcze nie zrenderowane
+
+      // Ustaw wysokość każdej cyfry = wysokość okna; font proporcjonalnie
+      // (robimy to za każdym razem, na wypadek resize)
+      if(inner.dataset.lastH !== String(h)){
+        inner.querySelectorAll('.work-roller-digit').forEach(d => {
+          d.style.height = h + 'px';
+          if(d.classList.contains('two-digit')){
+            d.style.fontSize = Math.floor(h * 0.50) + 'px';
+          } else {
+            d.style.fontSize = Math.floor(h * 0.85) + 'px';
+          }
+        });
+        inner.dataset.lastH = String(h);
+      }
+
+      const totalH = workMinutes / 60;
+      const intH = Math.min(20, Math.floor(totalH));
+      const frac = totalH - Math.floor(totalH);
+      const offset = (intH + frac) * h;
+      inner.style.transform = `translateY(-${offset}px)`;
     }
 
     function potRemainingSeconds(){
@@ -1226,11 +1333,12 @@
         if(bar) bar.style.height=pct.toFixed(1)+'%';
         ctr.textContent=Math.ceil(rem/60);
       } else {
-        // czas minął, grzanie nadal trwa do potwierdzenia, licznik liczy w górę CAŁOŚCIOWO
-        if(bar) bar.style.height='100%';
+        // czas minął, grzanie nadal trwa do potwierdzenia, licznik liczy CAŁOŚCIOWO
+        // Pasek znika żeby tło przycisku miało szansę migać (done-alarm/done-alarm-off)
+        if(bar) bar.style.height='0%';
         if(!potAckedDone){
           btn.classList.add(blinkState?'done-alarm':'done-alarm-off');
-          // pokaż łączny czas grzania w minutach
+          // pokaż łączny czas grzania w minutach (od startu, nie od alarmu)
           const totalMin=Math.ceil(elapsedSec/60);
           ctr.textContent=totalMin;
         } else {
@@ -1290,7 +1398,8 @@
         let noteCls='note-100', noteFile='100zl.png';
         if(per < 100){ noteCls='note-50'; noteFile='50zl.png'; }
         else if(per < 200){ noteCls='note-100'; noteFile='100zl.png'; }
-        else { noteCls='note-200'; noteFile='200zl.png'; }
+        else if(per < 400){ noteCls='note-200'; noteFile='200zl.png'; }
+        else { noteCls='note-500'; noteFile='500zl.png'; }
         moneyBot.classList.add(noteCls);
         moneyBot.style.backgroundImage=`url('Photos/${noteFile}')`;
         const t=document.createElement('div');
@@ -1465,14 +1574,14 @@
       for(const p of PROVIDERS){
         const v=revenues[p.key]||0;
         const disp=v>0?formatAmountDisplay(v):'—';
-        // Obrazek dostawcy z Photos/<klucz>.png; jeśli nie istnieje – pokaże tekst (onerror)
         const imgSrc = `Photos/${p.key}.png`;
         rows += `
           <div class="provider-row">
-            <button class="prov-btn prov-with-img" data-prov="${p.key}" style="background:${p.bg};color:${p.fg};">
+            <button class="prov-btn" data-prov="${p.key}" style="background:${p.bg};color:${p.fg};">
               <img src="${imgSrc}" alt="${p.label}" class="prov-img"
-                   onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
-              <span class="prov-fallback" style="display:none;">${p.label}</span>
+                   onload="this.parentElement.classList.add('has-img')"
+                   onerror="this.remove()" />
+              <span class="prov-label">${p.label}</span>
             </button>
             <div class="prov-amount ${v>0?'':'empty'}">${disp}</div>
           </div>`;
@@ -1507,22 +1616,31 @@
     function handleProviderClick(key){
       const cur=revenues[key]||0;
       if(cur>0){
+        const lab = PROVIDERS.find(p=>p.key===key).label;
         showOverlay(`
-          <div class="editor" style="aspect-ratio:auto;height:auto;">
-            <div style="color:#ccc;font-size:16px;text-align:center;padding:14px 10px;">
-              ${PROVIDERS.find(p=>p.key===key).label}: już ${formatAmountDisplay(cur)}.<br>
-              Nowa kwota ma:
+          <div class="big-panel" style="height:auto;max-width:440px;">
+            <div style="display:flex;justify-content:flex-start;padding:2px;">
+              <button class="cancel-btn" data-act="back" style="width:54px;height:54px;font-size:28px;">←</button>
             </div>
-            <div style="display:flex;gap:8px;padding:14px;">
-              <button class="ok-btn" data-choice="replace" style="flex:1;font-size:15px;height:56px;border-radius:12px;">ZASTĄPIĆ</button>
-              <button class="ok-btn" data-choice="add" style="flex:1;font-size:15px;height:56px;border-radius:12px;background:linear-gradient(180deg,#1a6aaa,#0a3a6a);">DODAĆ</button>
+            <div style="color:#ddd;font-size:17px;text-align:center;padding:18px 10px 8px;line-height:1.4;">
+              <strong>${lab}</strong>: już ${formatAmountDisplay(cur)}<br>
+              <span style="color:#999;font-size:14px;">Co zrobić z nową kwotą?</span>
             </div>
-            <div class="editor-actions">
-              <button class="cancel-btn" data-act="back">←</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 4px 4px;">
+              <button class="choice-btn" data-choice="replace"
+                      style="height:80px;border:none;border-radius:14px;font-size:18px;font-weight:900;color:#fff;background:linear-gradient(180deg,var(--ok),var(--ok-dark));box-shadow:0 0 18px rgba(24,132,57,.25);cursor:pointer;">
+                ZASTĄPIĆ
+              </button>
+              <button class="choice-btn" data-choice="add"
+                      style="height:80px;border:none;border-radius:14px;font-size:18px;font-weight:900;color:#fff;background:linear-gradient(180deg,#1a6aaa,#0a3a6a);box-shadow:0 0 18px rgba(26,106,170,.25);cursor:pointer;">
+                DODAĆ
+              </button>
             </div>
           </div>
         `);
-        overlay.querySelector('[data-act="back"]').addEventListener('click',(e)=>{ e.stopPropagation(); openMoneyPanel(); });
+        overlay.querySelector('[data-act="back"]').addEventListener('click',(e)=>{
+          e.stopPropagation(); openMoneyPanel();
+        });
         overlay.querySelectorAll('[data-choice]').forEach(b=>{
           b.addEventListener('click',(e)=>{
             e.stopPropagation();
@@ -2064,6 +2182,9 @@
     }
     buildDots();
     renderAll();
+    // Pierwszy render rolki może paść jeśli clientHeight=0 przed layoutem.
+    // Po pierwszej klatce wymuszamy ponowny render dla pewności.
+    requestAnimationFrame(()=>{ renderAll(); });
 
     setInterval(()=>{ blinkState=!blinkState; renderAll(); }, 1000);
 
