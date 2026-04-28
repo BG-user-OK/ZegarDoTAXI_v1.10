@@ -92,19 +92,37 @@
     }
 
     .notes-bar{
-      width:100%; min-height:38px;
-      display:flex; align-items:center; gap:6px;
-      padding:4px 6px; flex-wrap:wrap;
+      width:100%; min-height:64px;
+      display:flex; align-items:center; gap:2px;
+      padding:4px 60px 4px 6px;
+      flex-wrap:wrap;
     }
     .note-sticker{
-      min-width:34px; height:30px; padding:0 8px;
-      border-radius:6px 6px 10px 6px;
+      flex:0 0 auto;
+      width:var(--note-size, 68px);
+      height:var(--note-size, 60px);
+      padding:0 4px;
+      border-radius:8px 8px 14px 8px;
       display:inline-flex; align-items:center; justify-content:center;
-      font-size:13px; font-weight:700;
-      box-shadow:0 1px 2px rgba(0,0,0,.4); border:none; cursor:pointer;
+      font-size:calc(var(--note-size, 60px) * 0.5);
+      font-weight:800;
+      box-shadow:0 2px 4px rgba(0,0,0,.5);
+      border:none; cursor:pointer;
+      transition:opacity .2s, background .2s;
     }
-    .note-sticker.empty{ background:#1a1a1a; color:#3d3d3d; font-size:15px; }
-    .note-sticker.filled{ background:#d8d4b0; color:#222; font-size:18px; }
+    .note-sticker.empty{
+      background:#1a1a1a;
+      color:#5a5a3a;
+      font-size:calc(var(--note-size, 60px) * 0.45);
+    }
+    .note-sticker.filled{
+      background:#f4d847;
+      color:#3a2c00;
+    }
+    .note-sticker.alarm-blink{
+      background:#ff3838;
+      color:#fff;
+    }
     .note-sticker:active{ transform:scale(.96); }
 
     .clock-wrap{
@@ -122,14 +140,69 @@
       position:absolute; left:50%; top:50%;
       transform:translate(-50%,-50%);
       color:var(--dial-number); font-weight:900;
-      font-size:clamp(30px, 8vw, 56px);
+      font-size:clamp(45px, 12vw, 84px);
       line-height:1; letter-spacing:-1.2px;
+      transition:color .3s ease, text-shadow .3s ease;
+    }
+    .number.active{
+      color:#ffffff;
+      text-shadow:
+        0 0 8px rgba(255,255,255,.85),
+        0 0 16px rgba(255,255,255,.6),
+        0 0 24px rgba(180,255,200,.4);
     }
 
     .controls{
       width:min(96vw, 620px);
       display:grid; grid-template-columns:repeat(3, 1fr);
       grid-auto-rows:1fr; gap:6px; align-items:stretch;
+    }
+
+    /* Data pod zegarem (zmiana 11) */
+    .date-display{
+      width:100%;
+      text-align:center;
+      font-size:clamp(15px, 4vw, 22px);
+      font-weight:800;
+      color:#1c6c2a;
+      text-shadow:0 0 4px rgba(28,108,42,.4);
+      letter-spacing:.5px;
+      padding:4px 0;
+    }
+
+    /* Bateria w prawym górnym rogu (zmiana 13) */
+    .battery-indicator{
+      position:fixed;
+      top:6px; right:8px;
+      z-index:20;
+      padding:3px 9px;
+      border:1.5px solid #2ecc71;
+      border-radius:4px;
+      color:#2ecc71;
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.3px;
+      background:rgba(0,0,0,.4);
+      min-width:48px;
+      text-align:center;
+      pointer-events:none;
+    }
+    .battery-indicator::after{
+      content:'';
+      position:absolute;
+      top:50%;
+      right:-5px;
+      transform:translateY(-50%);
+      width:3px; height:9px;
+      background:#2ecc71;
+      border-radius:0 2px 2px 0;
+    }
+    .battery-indicator.low{
+      color:#ff3838;
+      border-color:#ff3838;
+    }
+    .battery-indicator.low::after{
+      background:#ff3838;
     }
     .btn{
       position:relative; border:none; border-radius:16px;
@@ -390,6 +463,11 @@
       display:flex; align-items:center; justify-content:center;
       z-index:50;
       pointer-events:auto;
+      /* ograniczenie do okręgu tarczy zegara - środek (50%,50%), promień ~50% */
+      clip-path:circle(50% at 50% 50%);
+      -webkit-clip-path:circle(50% at 50% 50%);
+      overflow:hidden;
+      border-radius:50%;
     }
     .end-confirm-overlay.hidden{ display:none; }
     .end-wave{
@@ -400,11 +478,20 @@
       border-radius:50%;
       transform:translate(-50%,-50%);
       animation:endWaveExpand .55s ease-out forwards;
-      box-shadow:0 0 60px rgba(255,40,40,.7);
+    }
+    /* Wariant żółty dla resetu */
+    .end-confirm-overlay.yellow .end-wave{
+      background:radial-gradient(circle,#ffe040 0%,#d6a90a 70%,#7a5e00 100%);
+    }
+    .end-confirm-overlay.yellow .end-confirm-counter,
+    .end-confirm-overlay.yellow .end-confirm-title,
+    .end-confirm-overlay.yellow .end-confirm-hint{
+      color:#1c1400;
+      text-shadow:0 1px 3px rgba(255,255,255,.5);
     }
     @keyframes endWaveExpand{
       0%   { width:0; height:0; opacity:.6; }
-      100% { width:170%; height:170%; opacity:1; }
+      100% { width:200%; height:200%; opacity:1; }
     }
     .end-confirm-content{
       position:relative;
@@ -417,7 +504,7 @@
     }
     @keyframes endTextFade{ to{ opacity:1; } }
     .end-confirm-title{
-      font-size:clamp(20px, 5.4vw, 30px);
+      font-size:clamp(18px, 4.6vw, 26px);
       font-weight:900;
       letter-spacing:.5px;
       line-height:1.1;
@@ -425,13 +512,13 @@
       margin-bottom:8px;
     }
     .end-confirm-counter{
-      font-size:clamp(72px, 22vw, 130px);
+      font-size:clamp(60px, 18vw, 110px);
       font-weight:900;
       line-height:1;
       text-shadow:0 4px 14px rgba(0,0,0,.7);
     }
     .end-confirm-hint{
-      font-size:clamp(13px, 3.4vw, 17px);
+      font-size:clamp(12px, 3vw, 15px);
       font-weight:700;
       color:rgba(255,230,230,.92);
       margin-top:6px;
@@ -657,15 +744,24 @@
       cursor:pointer;
       overflow:hidden;
       text-align:center;
+      min-height:46px;
     }
     .prov-img{
       position:absolute;
-      inset:4px;
-      max-width:calc(100% - 8px);
-      max-height:calc(100% - 8px);
+      right:0; top:50%;
+      transform:translateY(-50%);
+      max-width:100%;
+      max-height:100%;
+      height:auto; width:auto;
       object-fit:contain;
       pointer-events:none;
       display:none;
+    }
+    .prov-btn.has-img{
+      background:transparent !important;
+      border-radius:0;
+      justify-content:flex-end;
+      padding:0;
     }
     .prov-btn.has-img .prov-img{ display:block; }
     .prov-btn.has-img .prov-label{ display:none; }
@@ -793,6 +889,7 @@
 </head>
 <body>
   <div class="app">
+    <div class="battery-indicator" id="batteryIndicator">—</div>
     <div class="notes-bar" id="notesBar"></div>
 
     <div class="clock-wrap">
@@ -819,21 +916,23 @@
 
       <div class="clock-center">
         <div class="clock-face">
-          <div class="number" style="top:2%; left:50%;">12</div>
-          <div class="number" style="top:9%; left:75%;">1</div>
-          <div class="number" style="top:28%; left:91%;">2</div>
-          <div class="number" style="top:50%; left:99%;">3</div>
-          <div class="number" style="top:72%; left:91%;">4</div>
-          <div class="number" style="top:91%; left:75%;">5</div>
-          <div class="number" style="top:99%; left:50%;">6</div>
-          <div class="number" style="top:91%; left:25%;">7</div>
-          <div class="number" style="top:72%; left:9%;">8</div>
-          <div class="number" style="top:50%; left:1%;">9</div>
-          <div class="number" style="top:28%; left:9%;">10</div>
-          <div class="number" style="top:9%; left:25%;">11</div>
+          <div class="number" data-hour="12" style="top:2%; left:50%;">12</div>
+          <div class="number" data-hour="1" style="top:9%; left:75%;">1</div>
+          <div class="number" data-hour="2" style="top:28%; left:91%;">2</div>
+          <div class="number" data-hour="3" style="top:50%; left:99%;">3</div>
+          <div class="number" data-hour="4" style="top:72%; left:91%;">4</div>
+          <div class="number" data-hour="5" style="top:91%; left:75%;">5</div>
+          <div class="number" data-hour="6" style="top:99%; left:50%;">6</div>
+          <div class="number" data-hour="7" style="top:91%; left:25%;">7</div>
+          <div class="number" data-hour="8" style="top:72%; left:9%;">8</div>
+          <div class="number" data-hour="9" style="top:50%; left:1%;">9</div>
+          <div class="number" data-hour="10" style="top:28%; left:9%;">10</div>
+          <div class="number" data-hour="11" style="top:9%; left:25%;">11</div>
         </div>
       </div>
     </div>
+
+    <div class="date-display" id="dateDisplay"></div>
 
     <div class="controls">
       <button class="btn work-btn" id="workBtn" type="button">
@@ -874,7 +973,6 @@
 
       <button class="btn pot-btn" id="potBtn" type="button">
         <div class="lp-ring"></div>
-        <div class="edit-hint">✎ 3s</div>
         <div class="pot-fire-bar" id="potFireBar" style="height:0%"></div>
         <div class="btn-inner">
           <div class="center-big" id="potCenter">🫕</div>
@@ -901,7 +999,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.13</div>
+  <div class="version">v:1.14</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1090,6 +1188,24 @@
       g.appendChild(tri(100, 12, hourDeg, 'var(--hand-hour)'));
       // minutowa na wierzchu
       g.appendChild(tri(150, 7, minDeg, 'var(--hand-minute)'));
+
+      // === Podświetlenie aktualnej godziny (zmiana 14) ===
+      // Reguła: 0..30 min świeci tylko aktualna godzina, 30..55 świecą obie (akt + następna),
+      // 55..60 świeci tylko następna.
+      let activeHours = [];
+      const hh12 = h === 0 ? 12 : h;
+      const nextHh = hh12 === 12 ? 1 : hh12 + 1;
+      if(m < 30){
+        activeHours = [hh12];
+      } else if(m < 55){
+        activeHours = [hh12, nextHh];
+      } else {
+        activeHours = [nextHh];
+      }
+      document.querySelectorAll('.number').forEach(el => {
+        const hourVal = parseInt(el.dataset.hour, 10);
+        el.classList.toggle('active', activeHours.includes(hourVal));
+      });
     }
 
     // ===== czas / praca =====
@@ -1118,6 +1234,33 @@
       return Math.max(0, diffMinutes(lastExerciseMinutes,effectiveNow()) - getBreakOverlapSince(lastExerciseMinutes));
     }
 
+    // === Bug 15: efektywny początek czerwonego sektora ===
+    // Jeśli po lastExerciseMinutes była przerwa, "wizualny" start brakuczu ćwiczeń
+    // to koniec OSTATNIEJ takiej przerwy. W przeciwnym razie - lastExerciseMinutes.
+    // Dotyczy zarówno czerwonego pola na tarczy jak i radaru.
+    function getRedSectorStart(){
+      if(lastExerciseMinutes===null) return null;
+      const now = effectiveNow();
+      let latestBreakEnd = null;
+      // Iteruj zamknięte przerwy
+      for(const seg of breakSegments){
+        // Czy ta przerwa jest między lastExerciseMinutes a now?
+        const segEndAfter = diffMinutes(lastExerciseMinutes, seg.end);
+        const segEndBeforeNow = diffMinutes(seg.end, now);
+        // segment jest "po lastExercise" gdy segEndAfter < diffMinutes(lastExerciseMinutes, now)
+        // i jednocześnie seg.end <= now (czyli zamknięta przerwa skończyła się przed now)
+        if(segEndAfter > 0 && segEndAfter <= diffMinutes(lastExerciseMinutes, now)){
+          // wybierz najpóźniejszą z takich przerw
+          if(latestBreakEnd === null || segEndAfter > diffMinutes(lastExerciseMinutes, latestBreakEnd)){
+            latestBreakEnd = seg.end;
+          }
+        }
+      }
+      // Jeśli aktualnie trwa przerwa - radar nie powinien latać dalej, ale getEffectiveExerciseElapsed
+      // już pauzuje liczenie. Tu zwracamy najlepszy znany punkt:
+      return latestBreakEnd !== null ? latestBreakEnd : lastExerciseMinutes;
+    }
+
     function renderWorkFill(){
       const wf=document.getElementById('workFill');
       const nef=document.getElementById('noExerciseFill');
@@ -1133,7 +1276,8 @@
       if(base) wf.appendChild(svgFilledPath(base,'var(--work-green)',0.62));
 
       if(lastExerciseMinutes!==null && getEffectiveExerciseElapsed()>60){
-        const red=createSectorPath(lastExerciseMinutes,now,radius);
+        const sectorStart = getRedSectorStart();
+        const red=createSectorPath(sectorStart,now,radius);
         if(red) nef.appendChild(svgFilledPath(red,'var(--no-exercise-red)',0.78));
       }
       if(net>480 && forecastEnd!==null){
@@ -1148,7 +1292,8 @@
       if(startWorkMinutes===null||lastExerciseMinutes===null) return;
       if(getEffectiveExerciseElapsed()<=60) return;
 
-      const sM=lastExerciseMinutes, eM=effectiveNow();
+      const sM=getRedSectorStart();
+      const eM=effectiveNow();
       const spanM=diffMinutes(sM,eM);
       if(spanM<=0) return;
 
@@ -1449,18 +1594,85 @@
     function renderNotesBar(){
       const bar=document.getElementById('notesBar');
       clearChildren(bar);
+
+      // Dynamiczne skalowanie - im więcej karteczek tym mniejsze
+      const total = notes.length + 1;  // +1 za "dodaj"
+      let size = 68;
+      if(total > 5) size = 60;
+      if(total > 7) size = 52;
+      if(total > 9) size = 44;
+      if(total > 12) size = 36;
+      bar.style.setProperty('--note-size', size + 'px');
+
       const add=document.createElement('button');
       add.className='note-sticker empty';
+      add.style.setProperty('--note-size', size + 'px');
       add.textContent='＋';
       add.addEventListener('click', ()=> openNoteEditor(null));
       bar.appendChild(add);
+
+      // Sprawdź alarmy
+      const nowMs = Date.now();
       for(const n of notes){
         const b=document.createElement('button');
         b.className='note-sticker filled';
+        b.style.setProperty('--note-size', size + 'px');
         b.textContent=n.icon||'•';
         b.title=n.text||'';
-        b.addEventListener('click', ()=> openNoteEditor(n.id));
+
+        // Czy któryś alarm jest aktywny (przeszedł moment trigger i nie został potwierdzony)?
+        const activeAlarm = isNoteAlarmActive(n, nowMs);
+        if(activeAlarm && blinkState){
+          b.classList.add('alarm-blink');
+        }
+
+        b.addEventListener('click', ()=>{
+          if(isNoteAlarmActive(n, Date.now())){
+            // Stuknięcie aktywnego alarmu = potwierdzenie najbliższego
+            ackNoteAlarm(n);
+            saveState();
+            renderAll();
+          } else {
+            openNoteEditor(n.id);
+          }
+        });
         bar.appendChild(b);
+      }
+    }
+
+    // Czy notatka ma w tej chwili aktywny alarm (czas przekroczony i nie potwierdzony)?
+    function isNoteAlarmActive(n, nowMs){
+      if(!n.alarmTime || !Array.isArray(n.alerts) || n.alerts.length === 0) return false;
+      const triggerTimes = computeNoteAlertTimes(n);
+      for(const t of triggerTimes){
+        if(nowMs >= t.ms && !t.acked) return true;
+      }
+      return false;
+    }
+    // Oblicz czasy ms dla każdego alertu (w kontekście dzisiejszego dnia)
+    function computeNoteAlertTimes(n){
+      if(!n.alarmTime) return [];
+      const [hh,mm] = n.alarmTime.split(':').map(x=>parseInt(x,10));
+      const target = new Date();
+      target.setHours(hh, mm, 0, 0);
+      const targetMs = target.getTime();
+      const acked = n.ackedAlerts || {};
+      return (n.alerts||[]).map(min => ({
+        offset: min,
+        ms: targetMs - min*60*1000,
+        acked: !!acked[min]
+      }));
+    }
+    function ackNoteAlarm(n){
+      const triggerTimes = computeNoteAlertTimes(n);
+      const nowMs = Date.now();
+      // Potwierdź najbliższy nadal aktywny
+      for(const t of triggerTimes){
+        if(nowMs >= t.ms && !t.acked){
+          if(!n.ackedAlerts) n.ackedAlerts = {};
+          n.ackedAlerts[t.offset] = true;
+          break;
+        }
       }
     }
 
@@ -1472,6 +1684,42 @@
       renderExerciseMarks();
       renderForecastHand();
       renderButtons();
+      renderDate();
+      renderBattery();
+    }
+
+    // === Data pod zegarem ===
+    function renderDate(){
+      const el = document.getElementById('dateDisplay');
+      if(!el) return;
+      const days = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+      const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+      const d = new Date();
+      el.textContent = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+    }
+
+    // === Bateria w prawym górnym rogu ===
+    let batteryObj = null;
+    function renderBattery(){
+      const el = document.getElementById('batteryIndicator');
+      if(!el) return;
+      if(batteryObj === null){ el.textContent='—'; return; }
+      const pct = Math.round(batteryObj.level * 100);
+      el.textContent = pct + '%';
+      el.classList.toggle('low', pct <= 30);
+      // Miganie: gdy low, ukrywaj co sekundę
+      if(pct <= 30 && !blinkState){
+        el.style.visibility='hidden';
+      } else {
+        el.style.visibility='visible';
+      }
+    }
+    if(navigator.getBattery){
+      navigator.getBattery().then(b => {
+        batteryObj = b;
+        b.addEventListener('levelchange', renderBattery);
+        renderBattery();
+      }).catch(()=>{});
     }
 
     // ===== overlay =====
@@ -1660,8 +1908,11 @@
       if(mode==='counter'){
         let hint=ctx.hint;
         if(hint===null||hint===undefined) hint=0;
-        keypadCounterDigits=String(hint).padStart(6,'0').split('').map(d=>parseInt(d));
-        keypadCursorFromRight=0;
+        // Trzymam oryginalny hint (do liveKm i do backspace)
+        keypadContext.hintDigits = String(hint).padStart(6,'0').split('').map(d=>parseInt(d));
+        keypadCounterDigits = keypadContext.hintDigits.slice();
+        keypadContext.entered = [];   // historia wpisanych cyfr (od pierwszej do ostatniej)
+        keypadCursorFromRight = 0;    // zawsze na ostatniej pozycji
       }
       renderKeypad();
     }
@@ -1670,8 +1921,6 @@
       const curEnd=parseInt(keypadCounterDigits.join(''),10);
       if(counterStart===null) return '';
       const km=curEnd - counterStart - privKmTotal;
-      const sign=km<0?'':'+';
-      // ujemny = więcej priv niż różnica końc-pocz, lub jeszcze nie dokończone cyfry
       return `przebieg: ${km} km`;
     }
 
@@ -1683,8 +1932,8 @@
         disp=formatAmountDisplay(parseInt(keypadRaw||'0',10));
       } else if(keypadMode==='counter'){
         lab=keypadContext.label||'Licznik';
-        const idx=5-keypadCursorFromRight;
-        disp=keypadCounterDigits.map((d,i)=> i===idx?`<span class="underline">${d}</span>`:String(d)).join('');
+        // Kursor zawsze na ostatniej pozycji (idx=5)
+        disp=keypadCounterDigits.map((d,i)=> i===5?`<span class="underline">${d}</span>`:String(d)).join('');
       }
       showOverlay(`
         <div class="big-panel" style="max-width:420px;">
@@ -1719,7 +1968,11 @@
         if(keypadMode==='amount'){
           keypadRaw=keypadRaw.slice(0,-1);
         } else if(keypadMode==='counter'){
-          if(keypadCursorFromRight>0) keypadCursorFromRight--;
+          // cofnij ostatnio wpisaną cyfrę: usuń z entered, odbuduj displej z hint + entered
+          if(keypadContext.entered.length > 0){
+            keypadContext.entered.pop();
+            rebuildCounterDisplay();
+          }
         }
         renderKeypad(); return;
       }
@@ -1727,13 +1980,32 @@
         if(keypadMode==='amount'){
           if(keypadRaw.length<10) keypadRaw+=k;
         } else if(keypadMode==='counter'){
-          const idx=5-keypadCursorFromRight;
-          keypadCounterDigits[idx]=parseInt(k);
-          if(keypadCursorFromRight>=5){ commitKeypad(); return; }
-          keypadCursorFromRight++;
+          // shift left + push: nowa cyfra na końcu, najstarsza wypada z lewej
+          keypadContext.entered.push(parseInt(k));
+          if(keypadContext.entered.length > 6) keypadContext.entered.shift();
+          rebuildCounterDisplay();
+          // auto-akceptacja po wpisaniu 6 cyfr (cały licznik nadpisany)
+          if(keypadContext.entered.length >= 6){
+            commitKeypad();
+            return;
+          }
         }
         renderKeypad();
       }
+    }
+    // Buduje keypadCounterDigits jako: hint z lewej (na pozycjach niezastąpionych) + entered z prawej
+    function rebuildCounterDisplay(){
+      const hint = keypadContext.hintDigits;
+      const ent = keypadContext.entered;
+      const n = ent.length;
+      // n=0: tylko hint; n=k: ostatnich k pozycji to entered, reszta z hint (przesunięta? NIE - hint zostaje na lewych pozycjach)
+      // Przykład: hint=284756, wpisuję 3 -> 284753 (zastąpiona ostatnia)
+      // Wpisuję jeszcze 9 -> 284739 (ostatnie 2)
+      const result = hint.slice();
+      for(let i=0; i<n; i++){
+        result[6 - n + i] = ent[i];
+      }
+      keypadCounterDigits = result;
     }
     function commitKeypad(){
       if(keypadMode==='amount'){
@@ -1756,17 +2028,21 @@
     }
 
     function openCounterPanel(){
-      const sT=counterStart!==null?counterStart:'—';
+      // Licznik początkowy: jeśli pusty to pokaż lastCounterEnd (z wczoraj) jako podpowiedź
+      const sDisplay = counterStart!==null ? counterStart : (lastCounterEnd!==null ? lastCounterEnd : null);
+      const sIsHint = counterStart===null && lastCounterEnd!==null;
+      const sT=sDisplay!==null?sDisplay:'—';
       const eT=counterEnd!==null?counterEnd:'—';
       const pT=privKmTotal>0?privKmTotal:'—';
-      const endDis=counterStart===null?' disabled':'';
+      // Końcowy nie jest disabled jeśli mamy podpowiedź sDisplay (czyli też z lastCounterEnd)
+      const endDis=sDisplay===null?' disabled':'';
       showOverlay(`
         <div class="big-panel">
           <h3>Licznik kilometrów</h3>
           <div class="counter-fields">
             <div class="counter-row">
-              <div class="counter-label">Początkowy</div>
-              <div class="counter-value ${counterStart!==null?'':'empty'}">${sT}</div>
+              <div class="counter-label">Początkowy${sIsHint?' <span style="color:#888;font-weight:400;">(z wczoraj)</span>':''}</div>
+              <div class="counter-value ${sDisplay!==null?'':'empty'}" style="${sIsHint?'color:#aaa;':''}">${sT}</div>
               <button class="counter-edit" data-cnt="start">✎</button>
             </div>
             <div class="counter-row${endDis}">
@@ -1788,7 +2064,14 @@
         </div>
       `);
       overlay.querySelector('[data-act="back"]').addEventListener('click',(e)=>{ e.stopPropagation(); openMoneyPanel(); });
-      overlay.querySelector('[data-act="ok"]').addEventListener('click',(e)=>{ e.stopPropagation(); saveState(); hideOverlay(); renderAll(); });
+      overlay.querySelector('[data-act="ok"]').addEventListener('click',(e)=>{
+        e.stopPropagation();
+        // Jeśli counterStart jeszcze pusty ale mamy lastCounterEnd - akceptuj jako start (potwierdzenie)
+        if(counterStart===null && lastCounterEnd!==null){
+          counterStart = lastCounterEnd;
+        }
+        saveState(); hideOverlay(); renderAll();
+      });
       overlay.querySelectorAll('[data-cnt]').forEach(b=>{
         b.addEventListener('click',(e)=>{
           e.stopPropagation();
@@ -1798,7 +2081,7 @@
             hint=counterStart!==null?counterStart:(lastCounterEnd!==null?lastCounterEnd:0);
             label='Stan licznika początkowy';
           } else if(f==='end'){
-            hint=counterEnd!==null?counterEnd:(counterStart!==null?counterStart:0);
+            hint=counterEnd!==null?counterEnd:(counterStart!==null?counterStart:(lastCounterEnd!==null?lastCounterEnd:0));
             label='Stan licznika końcowy';
           } else if(f==='priv'){
             hint=0; label='Dodaj km prywatne';
@@ -1813,14 +2096,40 @@
       const ex = noteId!==null?notes.find(n=>n.id===noteId):null;
       const text=ex?ex.text:'';
       const icon=ex?ex.icon:'';
+      const alarmTime = ex && ex.alarmTime ? ex.alarmTime : '';
+      const alerts = (ex && Array.isArray(ex.alerts)) ? ex.alerts.slice() : [];
+      // Domyślne wyprzedzenia
+      const defaultOffsets = [15, 30, 60, 120];
+      // Pamiętamy własne wyprzedzenia (jeśli ktoś zedytował przez long-press)
+      const customOffsets = (ex && Array.isArray(ex.customOffsets)) ? ex.customOffsets.slice() : defaultOffsets.slice();
+
+      function offsetLabel(min){
+        if(min < 60) return min + 'm';
+        if(min % 60 === 0) return (min/60) + 'H';
+        return Math.floor(min/60) + 'H' + (min%60) + 'm';
+      }
+
       showOverlay(`
         <div class="big-panel">
           <h3>${ex?'Edytuj notatkę':'Nowa notatka'}</h3>
           <div class="note-fields">
             <label>Treść</label>
-            <textarea id="noteText" rows="6" placeholder="Np. kupić wodę...">${text.replace(/</g,'&lt;')}</textarea>
+            <textarea id="noteText" rows="4" placeholder="Np. kupić wodę...">${text.replace(/</g,'&lt;')}</textarea>
             <label>Symbol widoczny na karteczce (1–3 znaki)</label>
             <input id="noteIcon" class="icon-input" maxlength="3" value="${(icon||'').replace(/"/g,'&quot;')}" placeholder="💧" />
+            <label>Godzina alarmu (opcjonalnie, HH:MM)</label>
+            <input id="noteAlarm" class="icon-input" style="max-width:120px;" maxlength="5" value="${alarmTime}" placeholder="14:30" />
+            <label>Wyprzedzenie alarmu</label>
+            <div id="alertButtons" style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${customOffsets.map((off,idx)=>`
+                <button type="button" class="alert-btn ${alerts.includes(off)?'on':''}" data-offset="${off}" data-idx="${idx}"
+                        style="border:none;border-radius:8px;padding:8px 14px;font-size:16px;font-weight:800;cursor:pointer;
+                               background:${alerts.includes(off)?'#5a4a18':'#2a2a2a'};
+                               color:${alerts.includes(off)?'#ffd848':'#ccc'};">
+                  ${offsetLabel(off)}
+                </button>
+              `).join('')}
+            </div>
           </div>
           <div style="flex:1;"></div>
           <div class="panel-actions">
@@ -1832,13 +2141,83 @@
           </div>
         </div>
       `);
+
+      // Toggle alertów
+      const currentAlerts = alerts.slice();
+      const currentOffsets = customOffsets.slice();
+      let alertEditTimer = null;
+
+      overlay.querySelectorAll('.alert-btn').forEach(btn => {
+        // krótki klik = toggle
+        btn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          if(btn.dataset._longFired === '1'){ btn.dataset._longFired=''; return; }
+          const off = parseInt(btn.dataset.offset, 10);
+          const i = currentAlerts.indexOf(off);
+          if(i >= 0) currentAlerts.splice(i,1);
+          else currentAlerts.push(off);
+          // odśwież wygląd
+          if(currentAlerts.includes(off)){
+            btn.classList.add('on');
+            btn.style.background='#5a4a18';
+            btn.style.color='#ffd848';
+          } else {
+            btn.classList.remove('on');
+            btn.style.background='#2a2a2a';
+            btn.style.color='#ccc';
+          }
+        });
+        // long-press 2s = edycja wartości
+        let lp=null;
+        btn.addEventListener('pointerdown',(e)=>{
+          lp = setTimeout(()=>{
+            btn.dataset._longFired='1';
+            const idx = parseInt(btn.dataset.idx, 10);
+            const cur = currentOffsets[idx];
+            const v = prompt('Wyprzedzenie w minutach:', String(cur));
+            if(v !== null){
+              const num = parseInt(v.trim(), 10);
+              if(!isNaN(num) && num > 0){
+                // jeśli stary off był aktywny, przepisz na nowy
+                const oldOff = currentOffsets[idx];
+                const wasOn = currentAlerts.indexOf(oldOff);
+                if(wasOn>=0){ currentAlerts.splice(wasOn,1); currentAlerts.push(num); }
+                currentOffsets[idx] = num;
+                btn.dataset.offset = String(num);
+                btn.textContent = offsetLabel(num);
+              }
+            }
+          }, 2000);
+        });
+        btn.addEventListener('pointerup',()=>{ clearTimeout(lp); });
+        btn.addEventListener('pointerleave',()=>{ clearTimeout(lp); });
+        btn.addEventListener('pointercancel',()=>{ clearTimeout(lp); });
+      });
+
       overlay.querySelector('[data-act="cancel"]').addEventListener('click',(e)=>{ e.stopPropagation(); hideOverlay(); });
       overlay.querySelector('[data-act="ok"]').addEventListener('click',(e)=>{
         e.stopPropagation();
         const t=document.getElementById('noteText').value.trim();
         const i=document.getElementById('noteIcon').value.trim()||'•';
-        if(ex){ ex.text=t; ex.icon=i; }
-        else notes.push({ id:Date.now(), text:t, icon:i });
+        let aT=document.getElementById('noteAlarm').value.trim();
+        // Walidacja czasu
+        if(aT && !/^\d{1,2}:\d{2}$/.test(aT)) aT = '';
+        const alertOffs = currentAlerts.slice().sort((a,b)=>a-b);
+        if(ex){
+          ex.text=t; ex.icon=i;
+          ex.alarmTime = aT;
+          ex.alerts = alertOffs;
+          ex.customOffsets = currentOffsets;
+          // Reset acked przy zmianie
+          ex.ackedAlerts = {};
+        } else {
+          notes.push({
+            id:Date.now(), text:t, icon:i,
+            alarmTime: aT, alerts: alertOffs,
+            customOffsets: currentOffsets,
+            ackedAlerts: {}
+          });
+        }
         saveState(); hideOverlay(); renderAll();
       });
       const del=overlay.querySelector('[data-act="delete"]');
@@ -1855,6 +2234,13 @@
       breakSegments=[]; exerciseMarkers=[]; breakAdjustMinutes=0;
     }
     function setWorkStart(mins, fromEdit=false){
+      // Jeśli poprzednia dniówka jest "zamknięta" (endWorkMinutes ustawiony) - to znaczy że
+      // teraz startuję nową dniówkę. Czyścimy wszystkie dane poprzedniej dniówki PRZED startem.
+      if(endWorkMinutes!==null){
+        // zapamiętaj końcowy licznik na jutro (jeśli jeszcze nie zapisany)
+        if(counterEnd!==null && lastCounterEnd!==counterEnd) lastCounterEnd=counterEnd;
+        resetDayAfterExport();
+      }
       startWorkMinutes=mins;
       endWorkMinutes=null;
       lastExerciseMinutes = fromEdit ? nowMinutes() : mins;
@@ -1870,23 +2256,22 @@
       }
       breakActive=false; currentBreakStart=null;
       document.getElementById('workBtn').classList.remove('on');
+      // zapamiętaj końcowy licznik na jutro
+      if(counterEnd!==null) lastCounterEnd=counterEnd;
       saveState(); renderAll();
 
+      // Eksport - dane zostają na ekranie po sukcesie. Reset nastąpi dopiero przy nowym START.
       const url=localStorage.getItem(LS_APPSCRIPT);
       if(url){
         showToast('Eksport...','ok');
         const ok=await doExport(url);
         if(ok){
-          showToast('Eksport OK. Czyszczę dane dnia.','ok');
-          if(counterEnd!==null) lastCounterEnd=counterEnd;
-          resetDayAfterExport();
+          showToast('Eksport OK. Dane pozostają na ekranie.','ok');
           saveState(); renderAll();
         } else {
           showToast('Eksport nieudany. Spróbuj ponownie.','err');
         }
       } else {
-        if(counterEnd!==null) lastCounterEnd=counterEnd;
-        saveState();
         showToast('Praca zakończona. URL eksportu nie skonfigurowany.','err');
       }
     }
@@ -1899,6 +2284,13 @@
       PROVIDERS.forEach(p=>revenues[p.key]=0);
       counterStart=null; counterEnd=null; privKmTotal=0;
       potUsedToday=false;
+    }
+    function softReset(){
+      // Pełny reset bez eksportu - na potrzeby testowania / przypadkowego uruchomienia
+      resetDayAfterExport();
+      // Także garnek - jakby był aktywny
+      potStartedAt=null; potAckedDone=false;
+      saveState(); renderAll();
     }
 
     async function doExport(url){
@@ -1997,17 +2389,28 @@
       btn.addEventListener('pointercancel',(e)=>{ cancel(); });
     }
 
-    // === Animacja END - czerwona fala + odliczanie 5s ===
+    // === Animacja END - fala + odliczanie 5s. Może być red (koniec dniówki) lub yellow (reset). ===
     let endConfirmActive = false;
     let endConfirmTimer = null;
     let endConfirmInterval = null;
+    let endConfirmAction = null;   // funkcja do wywołania przy potwierdzeniu
 
-    function startEndConfirm(){
+    function startEndConfirm(opts){
       if(endConfirmActive) return;
+      opts = opts || {};
+      const variant = opts.variant || 'red';
+      const title = opts.title || 'POTWIERDŹ<br>KONIEC DNIÓWKI';
+      const action = opts.action || endWork;
       endConfirmActive = true;
+      endConfirmAction = action;
+
       const ov = document.getElementById('endConfirmOverlay');
       const ctr = document.getElementById('endConfirmCounter');
-      ov.classList.remove('hidden');
+      const ttl = ov.querySelector('.end-confirm-title');
+      ttl.innerHTML = title;
+      ov.classList.remove('hidden','yellow');
+      if(variant === 'yellow') ov.classList.add('yellow');
+
       // restart animacji fali (re-trigger)
       const wave = ov.querySelector('.end-wave');
       wave.style.animation='none';
@@ -2034,14 +2437,17 @@
     }
     function cancelEndConfirm(){
       endConfirmActive = false;
+      endConfirmAction = null;
       clearTimeout(endConfirmTimer);
       clearInterval(endConfirmInterval);
       const ov = document.getElementById('endConfirmOverlay');
       ov.classList.add('hidden');
+      ov.classList.remove('yellow');
     }
     function confirmEndAndFinish(){
+      const a = endConfirmAction;
       cancelEndConfirm();
-      endWork();
+      if(typeof a === 'function') a();
     }
 
     // klik w nakładkę = potwierdzenie
@@ -2049,6 +2455,46 @@
       e.stopPropagation();
       confirmEndAndFinish();
     });
+
+    // === Long-press na środku tarczy = soft reset (3s) ===
+    // Tworzymy niewidoczną strefę dotykową na środku tarczy
+    (function setupClockResetLongPress(){
+      const clockWrap = document.querySelector('.clock-wrap');
+      if(!clockWrap) return;
+      const zone = document.createElement('div');
+      zone.id = 'clockResetZone';
+      zone.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18%;height:18%;border-radius:50%;z-index:40;cursor:pointer;background:transparent;';
+      clockWrap.appendChild(zone);
+
+      let pressTimer=null, pressStarted=0, longFired=false, cancelled=false;
+      function start(){
+        if(endConfirmActive) return;  // nie startuj resetu gdy już trwa potwierdzenie
+        cancelled=false; longFired=false;
+        pressStarted=Date.now();
+        if(navigator.vibrate){ try{ navigator.vibrate([15]); }catch(e){} }
+        pressTimer=setTimeout(()=>{
+          if(cancelled) return;
+          longFired=true;
+          if(navigator.vibrate){ try{ navigator.vibrate([60,40,60]); }catch(e){} }
+          startEndConfirm({
+            variant:'yellow',
+            title:'POTWIERDŹ<br>RESET',
+            action: softReset
+          });
+        }, 3000);
+      }
+      function endP(){
+        clearTimeout(pressTimer);
+      }
+      function cancel(){
+        cancelled=true;
+        clearTimeout(pressTimer);
+      }
+      zone.addEventListener('pointerdown', start);
+      zone.addEventListener('pointerup', endP);
+      zone.addEventListener('pointerleave', cancel);
+      zone.addEventListener('pointercancel', cancel);
+    })();
 
     // === WORK button ===
     setupLongPress(
