@@ -162,12 +162,12 @@
     .date-display{
       width:100%;
       text-align:center;
-      font-size:clamp(15px, 4vw, 22px);
+      font-size:clamp(45px, 12vw, 66px);
       font-weight:800;
-      color:#1c6c2a;
-      text-shadow:0 0 4px rgba(28,108,42,.4);
+      color:var(--dial-number);
       letter-spacing:.5px;
-      padding:4px 0;
+      padding:6px 0;
+      line-height:1.05;
     }
 
     /* Bateria w prawym górnym rogu (zmiana 13) */
@@ -299,13 +299,13 @@
                  inset 0 0 10px rgba(0,0,0,.7);
       overflow:hidden;
       -webkit-mask-image:linear-gradient(180deg,
-        transparent 0%, rgba(0,0,0,.45) 18%,
-        black 38%, black 62%,
-        rgba(0,0,0,.45) 82%, transparent 100%);
+        transparent 0%, rgba(0,0,0,.7) 12%,
+        black 28%, black 72%,
+        rgba(0,0,0,.7) 88%, transparent 100%);
       mask-image:linear-gradient(180deg,
-        transparent 0%, rgba(0,0,0,.45) 18%,
-        black 38%, black 62%,
-        rgba(0,0,0,.45) 82%, transparent 100%);
+        transparent 0%, rgba(0,0,0,.7) 12%,
+        black 28%, black 72%,
+        rgba(0,0,0,.7) 88%, transparent 100%);
     }
     .work-roller-inner{
       display:flex; flex-direction:column;
@@ -322,7 +322,7 @@
       font-weight:900;
       color:#f4ffe8;
       text-shadow:0 1px 0 rgba(0,0,0,.5);
-      border-bottom:1px solid rgba(56,200,102,.32);
+      border-bottom:2.5px solid rgba(88,232,120,.55);
       box-sizing:border-box;
       /* font-size i height ustawia JS dynamicznie */
     }
@@ -360,7 +360,7 @@
       position:absolute; inset:0;
       display:grid;
       grid-template-rows:1fr 1fr;
-      gap:2px;
+      gap:0;
       z-index:2;
       pointer-events:none;
     }
@@ -387,32 +387,34 @@
       padding:0;
       font-variant-numeric:tabular-nums;
       white-space:nowrap;
-      /* offsety per-banknot - okienko nie jest idealnie na środku obrazka */
-      transform:translate(var(--note-tx, 0%), var(--note-ty, 0%));
+      /* offsety: --note-tx ustawia per-banknot (poziomo), górny dodatkowo dostaje shift w lewo */
+      transform:translate(calc(var(--note-tx, 0%) + var(--row-shift, 0%)), var(--note-ty, 0%));
     }
-    /* Kolory liczb dopasowane do banknotu + biała poświata żeby ciemne było widoczne */
+    /* Kolory liczb - rozjaśnione, w odcieniu banknotu, z delikatną poświatą */
     .money-cell.note-50  .money-cell-text{
-      color:#0a1c4a;          /* 50zł niebieski → ciemny granat */
-      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+      color:#3870c8;          /* 50zł niebieski - jaśniejszy granatowy */
+      text-shadow:0 0 6px rgba(0,30,90,.6), 0 1px 1px rgba(255,255,255,.3);
     }
     .money-cell.note-100 .money-cell-text{
-      color:#0d3a18;          /* 100zł zielony → ciemna zieleń */
-      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+      color:#1a8a3a;          /* 100zł zielony - intensywna zieleń */
+      text-shadow:0 0 6px rgba(0,40,15,.6), 0 1px 1px rgba(255,255,255,.3);
     }
     .money-cell.note-200 .money-cell-text{
-      color:#5a3a08;          /* 200zł złoty → ciemny złoty */
-      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+      color:#a87010;          /* 200zł złoty - jasny złoty/oker */
+      text-shadow:0 0 6px rgba(60,30,0,.55), 0 1px 1px rgba(255,255,255,.3);
     }
     .money-cell.note-500 .money-cell-text{
-      color:#2a1845;          /* 500zł brązowo-fioletowy → ciemny granat */
-      text-shadow:0 0 4px rgba(255,255,255,.85), 0 1px 0 rgba(255,255,255,.5);
+      color:#7a3aaa;          /* 500zł fiolet - jasny fioletowy */
+      text-shadow:0 0 6px rgba(40,0,60,.6), 0 1px 1px rgba(255,255,255,.3);
     }
-    /* Per-banknot offsety. Komórka ma center, więc tekst startuje w środku.
-       Wartości są procentami szerokości tekstu (translate %). Dostroimy obserwując. */
-    .money-cell.note-50  { --note-tx:8%;  --note-ty:0%; }   /* 50: okienko trochę w prawo */
-    .money-cell.note-100 { --note-tx:8%;  --note-ty:0%; }
-    .money-cell.note-200 { --note-tx:8%;  --note-ty:0%; }
-    .money-cell.note-500 { --note-tx:8%;  --note-ty:0%; }
+    /* Per-banknot offsety (gdyby okienko obrazka nie było centralnie - korekta) */
+    .money-cell.note-50  { --note-tx:0%; --note-ty:0%; }
+    .money-cell.note-100 { --note-tx:0%; --note-ty:0%; }
+    .money-cell.note-200 { --note-tx:0%; --note-ty:0%; }
+    .money-cell.note-500 { --note-tx:0%; --note-ty:0%; }
+    /* Punkt 2: górny banknot kwota w lewo o 20% szerokości komórki */
+    #moneyTop .money-cell-text { --row-shift:-20%; }
+    #moneyBot .money-cell-text { --row-shift:0%; }
 
     /* moneta (przycisk dolny prawy) */
     .coin-btn{
@@ -432,7 +434,7 @@
     }
     .coin-cell.empty{ background-image:none !important; }
     .coin-cell-text{
-      font-size:clamp(20px, 5.6vw, 32px);
+      font-size:clamp(40px, 11.2vw, 64px);
       font-weight:900;
       text-align:center;
       line-height:1;
@@ -492,6 +494,21 @@
     @keyframes endWaveExpand{
       0%   { width:0; height:0; opacity:.6; }
       100% { width:200%; height:200%; opacity:1; }
+    }
+    /* Punkt 5: zwijanie wstecz gdy minie czas bez kliknięcia */
+    @keyframes endWaveCollapse{
+      0%   { width:200%; height:200%; opacity:1; }
+      100% { width:0; height:0; opacity:.4; }
+    }
+    .end-confirm-overlay.collapsing .end-wave{
+      animation:endWaveCollapse .5s ease-in forwards !important;
+    }
+    .end-confirm-overlay.collapsing .end-confirm-content{
+      animation:endTextFadeOut .25s ease-out forwards !important;
+    }
+    @keyframes endTextFadeOut{
+      0% { opacity:1; }
+      100% { opacity:0; }
     }
     .end-confirm-content{
       position:relative;
@@ -937,7 +954,6 @@
     <div class="controls">
       <button class="btn work-btn" id="workBtn" type="button">
         <div class="lp-ring"></div>
-        <div class="edit-hint">✎ 3s</div>
         <div class="work-split">
           <div class="work-left">
             <div class="work-time-top" id="workStartMini">--:--</div>
@@ -963,7 +979,6 @@
 
       <button class="btn break-btn" id="breakBtn" type="button">
         <div class="lp-ring"></div>
-        <div class="edit-hint">✎ 3s</div>
         <div class="mini-corner" id="breakSumMini"></div>
         <div class="btn-inner">
           <div class="center-big" id="breakCenter"></div>
@@ -999,7 +1014,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.14</div>
+  <div class="version">v:1.15</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1428,25 +1443,31 @@
       const h = roller.clientHeight;
       if(!h) return;  // jeszcze nie zrenderowane
 
-      // Ustaw wysokość każdej cyfry = wysokość okna; font proporcjonalnie
-      // (robimy to za każdym razem, na wypadek resize)
+      // Każda cyfra ma height = 55% wysokości okna - dzięki temu sąsiadująca cyfra
+      // jest widoczna częściowo (efekt "rolki", gdzie cyfra wypiera następną).
+      const digitH = Math.round(h * 0.55);
+
+      // Ustaw wysokość każdej cyfry i font proporcjonalnie do digitH
       if(inner.dataset.lastH !== String(h)){
         inner.querySelectorAll('.work-roller-digit').forEach(d => {
-          d.style.height = h + 'px';
+          d.style.height = digitH + 'px';
           if(d.classList.contains('two-digit')){
-            d.style.fontSize = Math.floor(h * 0.50) + 'px';
+            d.style.fontSize = Math.floor(digitH * 0.78) + 'px';
           } else {
-            d.style.fontSize = Math.floor(h * 0.85) + 'px';
+            d.style.fontSize = Math.floor(digitH * 0.92) + 'px';
           }
         });
         inner.dataset.lastH = String(h);
       }
 
+      // Wycentruj tak, by aktualna cyfra była na środku okna.
+      // top inner = (h/2 - digitH/2) - (intH+frac)*digitH
       const totalH = workMinutes / 60;
       const intH = Math.min(20, Math.floor(totalH));
       const frac = totalH - Math.floor(totalH);
-      const offset = (intH + frac) * h;
-      inner.style.transform = `translateY(-${offset}px)`;
+      const baseOffset = (h / 2) - (digitH / 2);
+      const offset = baseOffset - (intH + frac) * digitH;
+      inner.style.transform = `translateY(${offset}px)`;
     }
 
     function potRemainingSeconds(){
@@ -1834,11 +1855,18 @@
             <div class="prov-amount ${v>0?'':'empty'}">${disp}</div>
           </div>`;
       }
-      const cAny = counterStart!==null||counterEnd!==null||privKmTotal>0;
+      // Punkt 8: zamiast 'otwórz' pokazuj najwyższy aktualny licznik (końcowy > początkowy > z wczoraj)
+      const counterDisplay = (
+        counterEnd !== null ? counterEnd :
+        counterStart !== null ? counterStart :
+        lastCounterEnd !== null ? lastCounterEnd :
+        null
+      );
+      const cAny = counterStart!==null||counterEnd!==null||privKmTotal>0||lastCounterEnd!==null;
       rows += `
         <div class="provider-row" style="margin-top:8px;">
           <button class="prov-btn" data-prov="__counter" style="background:#2a2a2a;color:#f0f0f0;">LICZNIK</button>
-          <div class="prov-amount ${cAny?'':'empty'}">${cAny?'otwórz':'—'}</div>
+          <div class="prov-amount ${cAny?'':'empty'}">${counterDisplay !== null ? counterDisplay : '—'}</div>
         </div>`;
       showOverlay(`
         <div class="big-panel">
@@ -2034,6 +2062,12 @@
       const sT=sDisplay!==null?sDisplay:'—';
       const eT=counterEnd!==null?counterEnd:'—';
       const pT=privKmTotal>0?privKmTotal:'—';
+      // Punkt 9: przebieg służbowy = końcowy - początkowy - prywatne
+      let kmZaw = null;
+      if(counterEnd !== null && sDisplay !== null){
+        kmZaw = counterEnd - sDisplay - privKmTotal;
+      }
+      const kmZawT = kmZaw !== null ? kmZaw : '—';
       // Końcowy nie jest disabled jeśli mamy podpowiedź sDisplay (czyli też z lastCounterEnd)
       const endDis=sDisplay===null?' disabled':'';
       showOverlay(`
@@ -2054,6 +2088,11 @@
               <div class="counter-label">km PRIV (dodaj)</div>
               <div class="counter-value ${privKmTotal>0?'':'empty'}">${pT}</div>
               <button class="counter-edit" data-cnt="priv">＋</button>
+            </div>
+            <div class="counter-row" style="background:#0a1f0d;">
+              <div class="counter-label" style="color:#7adf8a;">Przebieg służbowy</div>
+              <div class="counter-value ${kmZaw!==null?'':'empty'}" style="${kmZaw!==null?'color:#7adf8a;':''}">${kmZawT}</div>
+              <span style="width:36px;"></span>
             </div>
           </div>
           <div style="flex:1;"></div>
@@ -2425,28 +2464,38 @@
         secs--;
         if(secs <= 0){
           ctr.textContent = '0';
-          cancelEndConfirm();
+          cancelEndConfirm({collapse:true});
         } else {
           ctr.textContent = secs;
         }
       }, 1000);
 
       endConfirmTimer = setTimeout(()=>{
-        cancelEndConfirm();
+        cancelEndConfirm({collapse:true});
       }, 5000);
     }
-    function cancelEndConfirm(){
+    function cancelEndConfirm(opts){
+      const collapse = opts && opts.collapse;
       endConfirmActive = false;
       endConfirmAction = null;
       clearTimeout(endConfirmTimer);
       clearInterval(endConfirmInterval);
       const ov = document.getElementById('endConfirmOverlay');
-      ov.classList.add('hidden');
-      ov.classList.remove('yellow');
+      if(collapse){
+        // Zwiń wstecz (animacja), dopiero potem ukryj
+        ov.classList.add('collapsing');
+        setTimeout(()=>{
+          ov.classList.add('hidden');
+          ov.classList.remove('yellow','collapsing');
+        }, 500);
+      } else {
+        ov.classList.add('hidden');
+        ov.classList.remove('yellow','collapsing');
+      }
     }
     function confirmEndAndFinish(){
       const a = endConfirmAction;
-      cancelEndConfirm();
+      cancelEndConfirm();  // bez collapse - natychmiastowe ukrycie
       if(typeof a === 'function') a();
     }
 

@@ -1,6 +1,6 @@
 // Service Worker dla Tarczy czasu pracy
 // WAŻNE: przy każdej nowej wersji aplikacji zmień nazwę cache - stare wersje automatycznie się usuną.
-const CACHE_NAME = 'tarcza-v1.14';
+const CACHE_NAME = 'tarcza-v1.15';
 
 const FILES_TO_CACHE = [
   './',
