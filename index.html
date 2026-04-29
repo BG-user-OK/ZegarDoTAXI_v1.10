@@ -301,13 +301,21 @@
                  inset 0 0 10px rgba(0,0,0,.7);
       overflow:hidden;
       -webkit-mask-image:linear-gradient(180deg,
-        transparent 0%, rgba(0,0,0,.7) 12%,
-        black 28%, black 72%,
-        rgba(0,0,0,.7) 88%, transparent 100%);
+        transparent 0%,
+        rgba(0,0,0,.05) 22%,
+        rgba(0,0,0,.4) 35%,
+        black 45%, black 55%,
+        rgba(0,0,0,.4) 65%,
+        rgba(0,0,0,.05) 78%,
+        transparent 100%);
       mask-image:linear-gradient(180deg,
-        transparent 0%, rgba(0,0,0,.7) 12%,
-        black 28%, black 72%,
-        rgba(0,0,0,.7) 88%, transparent 100%);
+        transparent 0%,
+        rgba(0,0,0,.05) 22%,
+        rgba(0,0,0,.4) 35%,
+        black 45%, black 55%,
+        rgba(0,0,0,.4) 65%,
+        rgba(0,0,0,.05) 78%,
+        transparent 100%);
     }
     .work-roller-inner{
       display:flex; flex-direction:column;
@@ -1115,7 +1123,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.19</div>
+  <div class="version">v:1.20</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -2751,7 +2759,30 @@
     // ===== PWA =====
     if('serviceWorker' in navigator){
       window.addEventListener('load', ()=>{
-        navigator.serviceWorker.register('sw.js').catch(()=>{});
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          // Sprawdzaj aktualizacje co 60 sek - automatycznie pobiera nowy sw.js
+          setInterval(()=>{ reg.update().catch(()=>{}); }, 60000);
+
+          // Gdy znaleziono nowy SW i jest gotowy do aktywacji - od razu go aktywuj i przeładuj stronę
+          reg.addEventListener('updatefound', ()=>{
+            const newSW = reg.installing;
+            if(!newSW) return;
+            newSW.addEventListener('statechange', ()=>{
+              if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+                // Mamy nowy SW gotowy - poproś o przejęcie kontroli
+                newSW.postMessage({type:'SKIP_WAITING'});
+              }
+            });
+          });
+        }).catch(()=>{});
+
+        // Gdy aktywny SW się zmieni - przeładuj stronę żeby załadować nowy index.html
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+          if(refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
       });
     }
     let deferredInstallPrompt=null;
