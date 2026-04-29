@@ -111,9 +111,11 @@
       transition:opacity .2s, background .2s;
     }
     .note-sticker.empty{
+      width:34px;
+      height:30px;
       background:#1a1a1a;
       color:#5a5a3a;
-      font-size:calc(var(--note-size, 60px) * 0.45);
+      font-size:18px;
     }
     .note-sticker.filled{
       background:#f4d847;
@@ -356,6 +358,18 @@
       overflow:hidden;
       border-radius:0;
     }
+    /* Pełnoekranowy worek pieniędzy gdy brak kwot - znika gdy są banknoty */
+    .money-empty-bag{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      display:flex; align-items:center; justify-content:center;
+      font-size:clamp(70px, 18vw, 130px);
+      line-height:1;
+      pointer-events:none;
+      opacity:.85;
+    }
+    .money-empty-bag.hidden{ display:none; }
     .money-split{
       position:absolute; inset:0;
       display:grid;
@@ -743,17 +757,78 @@
       text-transform:uppercase; letter-spacing:1px;
     }
     .providers-list{
-      flex:1; display:flex; flex-direction:column;
-      gap:6px; overflow-y:auto;
+      flex:1;
+      display:flex; flex-direction:column;
+      gap:8px;
+      overflow-y:auto;
+      position:relative;
+      padding:18px 14px;
+      isolation:isolate;
     }
+    /* Dwie tablice w tle - srebrna (lewa) i złota (prawa) */
+    .board-bg{
+      position:absolute;
+      top:8px; bottom:8px;
+      width:calc(50% - 4px);
+      border-radius:14px;
+      z-index:0;
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,.4),
+        inset 0 -2px 6px rgba(0,0,0,.4),
+        0 4px 14px rgba(0,0,0,.6);
+    }
+    .board-silver{
+      left:4px;
+      background:linear-gradient(140deg,
+        #d8d8de 0%, #a8a8b0 25%, #c5c5cc 50%,
+        #9a9aa2 75%, #b8b8c0 100%);
+    }
+    .board-gold{
+      right:4px;
+      background:linear-gradient(140deg,
+        #f5d570 0%, #c69a30 25%, #e8c25a 50%,
+        #b78920 75%, #d6b042 100%);
+    }
+    /* Śrubki w rogach każdej tablicy */
+    .board-bg::before, .board-bg::after,
+    .board-bg .screw-bl, .board-bg .screw-br{
+      content:'';
+      position:absolute;
+      width:11px; height:11px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #fafafa 0%, #b0b0b0 35%, #555 100%);
+      box-shadow:
+        inset -1px -1px 1px rgba(0,0,0,.5),
+        0 1px 2px rgba(0,0,0,.6);
+    }
+    .board-gold::before, .board-gold::after,
+    .board-gold .screw-bl, .board-gold .screw-br{
+      background:radial-gradient(circle at 30% 30%, #fff4cc 0%, #b8902a 35%, #5a4408 100%);
+    }
+    .board-bg::before{ top:5px; left:5px; }
+    .board-bg::after{ top:5px; right:5px; }
+    .board-bg .screw-bl{ position:absolute; bottom:5px; left:5px; }
+    .board-bg .screw-br{ position:absolute; bottom:5px; right:5px; }
+    /* Linia "wycięcia" w środku śruby */
+    .board-bg::before, .board-bg::after,
+    .board-bg .screw-bl, .board-bg .screw-br{
+      background-image:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.7) 0%, transparent 40%),
+        linear-gradient(90deg, transparent 40%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.55) 55%, transparent 60%);
+    }
+
     .provider-row{
+      position:relative;
+      z-index:1;
       display:grid;
-      grid-template-columns:1.2fr 1fr;
-      gap:6px; min-height:46px;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      min-height:50px;
+      padding:0 4px;
     }
     .prov-btn{
       position:relative;
-      border:none; border-radius:10px;
+      border:none; border-radius:8px;
       font-size:18px; font-weight:900;
       letter-spacing:.5px;
       padding:0 10px;
@@ -762,14 +837,17 @@
       overflow:hidden;
       text-align:center;
       min-height:46px;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.15);
     }
     .prov-img{
       position:absolute;
-      right:0; top:50%;
-      transform:translateY(-50%);
-      max-width:100%;
-      max-height:100%;
-      height:auto; width:auto;
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      height:100%;
+      width:auto;
+      max-width:none;
       object-fit:contain;
       pointer-events:none;
       display:none;
@@ -777,8 +855,9 @@
     .prov-btn.has-img{
       background:transparent !important;
       border-radius:0;
-      justify-content:flex-end;
+      justify-content:center;
       padding:0;
+      box-shadow:none;
     }
     .prov-btn.has-img .prov-img{ display:block; }
     .prov-btn.has-img .prov-label{ display:none; }
@@ -788,13 +867,17 @@
     }
     .prov-amount{
       display:flex; align-items:center; justify-content:flex-end;
-      padding:0 12px;
-      background:#1a1a1a; border-radius:10px;
-      color:#e6e6e6;
-      font-size:22px; font-weight:900;
+      padding:0 14px;
+      background:rgba(0,0,0,.55);
+      border-radius:8px;
+      color:#fff;
+      font-size:24px; font-weight:900;
       font-variant-numeric:tabular-nums;
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,.6),
+        0 1px 0 rgba(255,255,255,.2);
     }
-    .prov-amount.empty{ color:#444; }
+    .prov-amount.empty{ color:#888; }
 
     .panel-actions{
       display:flex; justify-content:space-between; align-items:center;
@@ -995,18 +1078,15 @@
       </button>
 
       <button class="btn money-btn" id="moneyBtn" type="button">
+        <div class="money-empty-bag" id="moneyEmptyBag">💰</div>
         <div class="money-split">
-          <div class="money-cell empty" id="moneyTop">
-            <div style="font-size:24px;opacity:.7;">💰</div>
-          </div>
+          <div class="money-cell empty" id="moneyTop"></div>
           <div class="money-cell empty" id="moneyBot"></div>
         </div>
       </button>
 
       <button class="btn coin-btn" id="coinBtn" type="button">
-        <div class="coin-cell empty" id="coinCell">
-          <div style="font-size:22px;opacity:.5;">🪙</div>
-        </div>
+        <div class="coin-cell empty" id="coinCell"></div>
       </button>
     </div>
   </div>
@@ -1014,7 +1094,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.16</div>
+  <div class="version">v:1.18</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1524,6 +1604,7 @@
       const moneyTop=document.getElementById('moneyTop');
       const moneyBot=document.getElementById('moneyBot');
       const coinCell=document.getElementById('coinCell');
+      const moneyEmptyBag=document.getElementById('moneyEmptyBag');
 
       // === górny banknot: SUMA OBROTÓW ===
       moneyTop.classList.remove('note-50','note-100','note-200','note-500','empty');
@@ -1533,10 +1614,6 @@
       const total=getTotalRevenueGroszy();
       if(total<=0){
         moneyTop.classList.add('empty');
-        const em=document.createElement('div');
-        em.style.fontSize='24px'; em.style.opacity='.7';
-        em.textContent='💰';
-        moneyTop.appendChild(em);
       } else {
         const totalInt=Math.floor(total/100);
         let noteCls='note-100', noteFile='100zl.png';
@@ -1576,6 +1653,15 @@
         moneyBot.classList.add('empty');
       }
 
+      // === pełnoekranowy worek pojawia się tylko gdy oba banknoty są puste ===
+      if(moneyEmptyBag){
+        if(total <= 0){
+          moneyEmptyBag.classList.remove('hidden');
+        } else {
+          moneyEmptyBag.classList.add('hidden');
+        }
+      }
+
       // === moneta: zł/km ===
       coinCell.classList.remove('coin-1','coin-2','coin-5','empty');
       coinCell.style.backgroundImage='';
@@ -1598,17 +1684,9 @@
           coinCell.appendChild(t);
         } else {
           coinCell.classList.add('empty');
-          const em=document.createElement('div');
-          em.style.fontSize='22px'; em.style.opacity='.5';
-          em.textContent='🪙';
-          coinCell.appendChild(em);
         }
       } else {
         coinCell.classList.add('empty');
-        const em=document.createElement('div');
-        em.style.fontSize='22px'; em.style.opacity='.5';
-        em.textContent='🪙';
-        coinCell.appendChild(em);
       }
     }
 
@@ -1871,10 +1949,14 @@
       showOverlay(`
         <div class="big-panel">
           <h3>Obroty dnia</h3>
-          <div class="providers-list">${rows}</div>
+          <div class="providers-list">
+            <div class="board-bg board-silver"><span class="screw-bl"></span><span class="screw-br"></span></div>
+            <div class="board-bg board-gold"><span class="screw-bl"></span><span class="screw-br"></span></div>
+            ${rows}
+          </div>
           <div class="panel-actions">
-            <button class="cancel-btn" data-act="cancel">✕</button>
-            <button class="ok-btn" data-act="ok">✓</button>
+            <button class="cancel-btn" data-act="cancel" style="width:96px;height:96px;font-size:48px;border-radius:20px;">✕</button>
+            <button class="ok-btn" data-act="ok" style="width:96px;height:96px;font-size:48px;border-radius:20px;">✓</button>
           </div>
         </div>
       `);
