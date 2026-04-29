@@ -752,9 +752,13 @@
       position:relative;
     }
     .big-panel h3{
-      margin:2px 6px 4px;
-      font-size:14px; font-weight:700; color:#888;
-      text-transform:uppercase; letter-spacing:1px;
+      margin:6px 0 8px;
+      font-size:22px; font-weight:900;
+      color:#bbb;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      text-align:center;
+      text-shadow:0 1px 2px rgba(0,0,0,.6);
     }
     .providers-list{
       flex:1;
@@ -762,32 +766,42 @@
       gap:8px;
       overflow-y:auto;
       position:relative;
-      padding:18px 14px;
+      padding:32px 14px;
       isolation:isolate;
     }
     /* Dwie tablice w tle - srebrna (lewa) i złota (prawa) */
     .board-bg{
       position:absolute;
-      top:8px; bottom:8px;
-      width:calc(50% - 4px);
+      top:0; bottom:0;
+      width:calc(50% - 8px);
       border-radius:14px;
       z-index:0;
       box-shadow:
-        inset 0 2px 4px rgba(255,255,255,.4),
-        inset 0 -2px 6px rgba(0,0,0,.4),
-        0 4px 14px rgba(0,0,0,.6);
+        inset 0 2px 4px rgba(255,255,255,.5),
+        inset 0 -2px 6px rgba(0,0,0,.45),
+        0 4px 14px rgba(0,0,0,.7);
     }
     .board-silver{
-      left:4px;
-      background:linear-gradient(140deg,
-        #d8d8de 0%, #a8a8b0 25%, #c5c5cc 50%,
-        #9a9aa2 75%, #b8b8c0 100%);
+      left:0;
+      background:
+        /* drobne pionowe szlify */
+        repeating-linear-gradient(90deg,
+          rgba(255,255,255,.04) 0 1px,
+          transparent 1px 3px),
+        /* główny gradient metalowy */
+        linear-gradient(140deg,
+          #e4e4ea 0%, #aaaab2 18%, #cdcdd4 35%,
+          #969aa0 52%, #d0d0d6 70%, #9a9aa2 88%, #b5b5bc 100%);
     }
     .board-gold{
-      right:4px;
-      background:linear-gradient(140deg,
-        #f5d570 0%, #c69a30 25%, #e8c25a 50%,
-        #b78920 75%, #d6b042 100%);
+      right:0;
+      background:
+        repeating-linear-gradient(90deg,
+          rgba(0,0,0,.05) 0 1px,
+          transparent 1px 3px),
+        linear-gradient(140deg,
+          #f8da72 0%, #c69a30 18%, #ecc760 35%,
+          #b58820 52%, #ecc960 70%, #ad8018 88%, #d6a838 100%);
     }
     /* Śrubki w rogach każdej tablicy */
     .board-bg::before, .board-bg::after,
@@ -796,35 +810,42 @@
       position:absolute;
       width:11px; height:11px;
       border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #fafafa 0%, #b0b0b0 35%, #555 100%);
       box-shadow:
         inset -1px -1px 1px rgba(0,0,0,.5),
         0 1px 2px rgba(0,0,0,.6);
     }
+    .board-silver::before, .board-silver::after,
+    .board-silver .screw-bl, .board-silver .screw-br{
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.7) 0%, transparent 40%),
+        linear-gradient(90deg, transparent 40%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.55) 55%, transparent 60%),
+        radial-gradient(circle at 30% 30%, #fafafa 0%, #b0b0b0 35%, #555 100%);
+    }
     .board-gold::before, .board-gold::after,
     .board-gold .screw-bl, .board-gold .screw-br{
-      background:radial-gradient(circle at 30% 30%, #fff4cc 0%, #b8902a 35%, #5a4408 100%);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,250,210,.7) 0%, transparent 40%),
+        linear-gradient(90deg, transparent 40%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.55) 55%, transparent 60%),
+        radial-gradient(circle at 30% 30%, #fff4cc 0%, #b8902a 35%, #5a4408 100%);
     }
-    .board-bg::before{ top:5px; left:5px; }
-    .board-bg::after{ top:5px; right:5px; }
-    .board-bg .screw-bl{ position:absolute; bottom:5px; left:5px; }
-    .board-bg .screw-br{ position:absolute; bottom:5px; right:5px; }
-    /* Linia "wycięcia" w środku śruby */
-    .board-bg::before, .board-bg::after,
-    .board-bg .screw-bl, .board-bg .screw-br{
-      background-image:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.7) 0%, transparent 40%),
-        linear-gradient(90deg, transparent 40%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.55) 55%, transparent 60%);
-    }
+    .board-bg::before{ top:7px; left:7px; }
+    .board-bg::after{ top:7px; right:7px; }
+    .board-bg .screw-bl{ position:absolute; bottom:7px; left:7px; }
+    .board-bg .screw-br{ position:absolute; bottom:7px; right:7px; }
 
     .provider-row{
       position:relative;
       z-index:1;
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:8px;
+      column-gap:16px;
       min-height:50px;
-      padding:0 4px;
+      padding:0;
+    }
+    /* Wewnątrz każdej kolumny - moduł z marginesem od krawędzi tablicy */
+    .provider-row > .prov-btn,
+    .provider-row > .prov-amount{
+      margin:0 14px;
     }
     .prov-btn{
       position:relative;
@@ -1094,7 +1115,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.18</div>
+  <div class="version">v:1.19</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
