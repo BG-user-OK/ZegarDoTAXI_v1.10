@@ -170,6 +170,10 @@
       letter-spacing:.5px;
       padding:6px 0;
       line-height:1.05;
+      text-shadow:
+        0 0 8px rgba(220,220,225,.55),
+        0 0 16px rgba(200,200,210,.35),
+        0 0 24px rgba(180,180,200,.2);
     }
 
     /* Bateria w prawym górnym rogu (zmiana 13) */
@@ -580,6 +584,97 @@
     }
 
     .exercise-btn{ background:linear-gradient(180deg,var(--btn-ex-off-1),var(--btn-ex-off-2)); }
+
+    /* === Siatka kół (zamiast biegacza) === */
+    .wheels-grid{
+      position:absolute;
+      inset:0;
+      display:grid;
+      gap:2%;
+      padding:4%;
+      box-sizing:border-box;
+      align-content:center;
+      justify-content:center;
+      align-items:center;
+      justify-items:center;
+      z-index:2;
+    }
+    /* Pojedyncze koło - SVG przez tło, czarna opona ze srebrną felgą + biaława poświata */
+    .wheel{
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%, #c0c0c8 0%, #909098 18%, #404048 28%, #1a1a1f 32%, #050505 100%);
+      box-shadow:
+        0 0 8px rgba(220,220,235,.35),
+        0 0 14px rgba(200,210,225,.18),
+        inset 0 -3px 6px rgba(0,0,0,.7),
+        inset 0 2px 4px rgba(255,255,255,.15);
+      position:relative;
+      transition:opacity .3s ease;
+    }
+    /* Promienie felgi */
+    .wheel::before{
+      content:'';
+      position:absolute;
+      inset:18%;
+      border-radius:50%;
+      background:
+        radial-gradient(circle, transparent 38%, rgba(20,20,25,.85) 42%, transparent 48%),
+        conic-gradient(from 0deg,
+          #707080, #aaabb5, #707080, #aaabb5, #707080,
+          #aaabb5, #707080, #aaabb5, #707080, #aaabb5,
+          #707080, #aaabb5);
+      box-shadow:inset 0 0 6px rgba(0,0,0,.6);
+    }
+    .wheel::after{
+      content:'';
+      position:absolute;
+      inset:42%;
+      border-radius:50%;
+      background:radial-gradient(circle, #d8d8e0 0%, #707078 80%, #303038 100%);
+      box-shadow:0 0 3px rgba(0,0,0,.5);
+    }
+    /* Animacja zwijania - 3s, czarne okręgi narastają od zewnątrz, koło znika */
+    .wheel.vanishing{
+      animation:wheelVanish 3s ease-in forwards;
+    }
+    @keyframes wheelVanish{
+      0%   { transform:scale(1); opacity:1;
+             box-shadow:0 0 8px rgba(220,220,235,.35), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
+      30%  { transform:scale(.85); opacity:.9;
+             box-shadow:inset 0 0 0 6px #000, inset 0 0 0 12px rgba(20,20,25,.7), 0 0 4px rgba(220,220,235,.2); }
+      60%  { transform:scale(.5); opacity:.65;
+             box-shadow:inset 0 0 0 12px #000, inset 0 0 0 30px rgba(20,20,25,.85); }
+      100% { transform:scale(0); opacity:0; }
+    }
+
+    /* Nakładka licznika nadwyżki (>60min) - czerwone tło z rolką liczby minut */
+    .overage-display{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      background:linear-gradient(180deg, #c01515, #6a0808);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.15),
+        inset 0 -10px 18px rgba(0,0,0,.45),
+        0 0 22px rgba(255,40,40,.35);
+      display:none;
+      border-radius:16px;
+    }
+    .exercise-btn.overage .overage-display{
+      display:block;
+    }
+    .exercise-btn.overage .wheels-grid{
+      display:none;
+    }
+    /* Rolka nadwyżki używa stylów .work-roller, tylko cyfry mają inny kolor */
+    .overage-display .work-roller-digit{
+      color:#fff !important;
+      text-shadow:0 0 6px rgba(255,180,180,.6);
+      border-bottom:2.5px solid rgba(255,200,200,.45);
+    }
     .exercise-btn.flash{
       background:linear-gradient(180deg,var(--btn-ex-on-1),var(--btn-ex-on-2));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.16),
@@ -603,6 +698,34 @@
     }
 
     .break-btn{ background:linear-gradient(180deg,var(--btn-break-off-1),var(--btn-break-off-2)); }
+    /* Obrazek "przerwa" - widoczny gdy spoczynek; znika gdy przerwa aktywna lub po jej zakończeniu (jest dane) */
+    .break-img{
+      position:absolute;
+      inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      z-index:1;
+      pointer-events:none;
+      display:none;
+    }
+    .break-btn.has-img{
+      background:#000;
+    }
+    .break-btn.has-img .break-img{
+      display:block;
+    }
+    /* Gdy przerwa jest aktywna lub mamy do pokazania liczbę - obrazek znika i widać klasyczny przycisk */
+    .break-btn.on .break-img,
+    .break-btn.has-data .break-img{
+      display:none;
+    }
+    .break-btn.has-data{
+      background:linear-gradient(180deg,var(--btn-break-off-1),var(--btn-break-off-2));
+    }
+    /* Emoji klepsydry również ukrywamy gdy mamy obrazek (i nie jest aktywne ani z danymi) */
+    .break-btn.has-img:not(.on):not(.has-data) #breakEmoji{
+      display:none;
+    }
     .break-btn.on{
       background:linear-gradient(180deg,var(--btn-break-on-1),var(--btn-break-on-2));
       color:#272100;
@@ -1091,19 +1214,24 @@
       </button>
 
       <button class="btn exercise-btn" id="exerciseBtn" type="button">
-        <div class="btn-inner">
-          <div class="center-big" id="exerciseCenter">0</div>
+        <div class="wheels-grid" id="wheelsGrid"></div>
+        <div class="overage-display" id="overageDisplay">
+          <div class="work-roller" style="position:absolute;top:50%;left:6%;right:6%;transform:translateY(-50%);height:80%;background:rgba(0,0,0,.55);">
+            <div class="work-roller-inner" id="overageRollerInner"></div>
+          </div>
         </div>
-        <div class="emoji">🏃</div>
       </button>
 
       <button class="btn break-btn" id="breakBtn" type="button">
         <div class="lp-ring"></div>
+        <img src="Photos/przerwa.png" alt="Przerwa" class="break-img" id="breakImg"
+             onload="this.parentElement.classList.add('has-img')"
+             onerror="this.remove()" />
         <div class="mini-corner" id="breakSumMini"></div>
         <div class="btn-inner">
           <div class="center-big" id="breakCenter"></div>
         </div>
-        <div class="emoji">⌛</div>
+        <div class="emoji" id="breakEmoji">⌛</div>
       </button>
 
       <button class="btn pot-btn" id="potBtn" type="button">
@@ -1131,7 +1259,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.21</div>
+  <div class="version">v:1.22</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1221,6 +1349,16 @@
           potStartedAt = s.potStartedAt ?? null;
           potAckedDone = !!s.potAckedDone;
           potUsedToday = !!s.potUsedToday;
+          // Sanitacja: jeśli pot był uruchomiony >24h temu (np. zostawiony z innego dnia
+          // i apka się sama nie wygasiła) - resetujemy. Inaczej miga z zawyżonymi liczbami.
+          if(potStartedAt !== null){
+            const ageMs = Date.now() - potStartedAt;
+            const maxAgeMs = 24 * 60 * 60 * 1000;
+            if(ageMs > maxAgeMs || ageMs < 0){
+              potStartedAt = null;
+              potAckedDone = false;
+            }
+          }
           if(s.revenues){
             PROVIDERS.forEach(p => revenues[p.key] = s.revenues[p.key] || 0);
           }
@@ -1296,8 +1434,8 @@
       const g=document.getElementById('hands');
       clearChildren(g);
       const now=new Date();
-      const h=now.getHours()%12, m=now.getMinutes(), s=now.getSeconds();
-      const hourDeg=h*30 + m*0.5;
+      const h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
+      const hourDeg=(h%12)*30 + m*0.5;
       const minDeg=m*6 + s*0.1;
 
       function tri(len, halfW, angDeg, fill){
@@ -1325,18 +1463,37 @@
       // Reguła: 0..30 min świeci tylko aktualna godzina, 30..55 świecą obie (akt + następna),
       // 55..60 świeci tylko następna.
       let activeHours = [];
-      const hh12 = h === 0 ? 12 : h;
-      const nextHh = hh12 === 12 ? 1 : hh12 + 1;
-      if(m < 30){
-        activeHours = [hh12];
-      } else if(m < 55){
-        activeHours = [hh12, nextHh];
-      } else {
-        activeHours = [nextHh];
+      const hh12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
+      const hNext24 = (h + 1) % 24;
+      const nextHh = hNext24 === 0 ? 12 : (hNext24 > 12 ? hNext24 - 12 : hNext24);
+
+      // Funkcja: dla godziny w 24h (0..23) zwraca napis który ma być wyświetlony
+      function hourLabel24(hour24){
+        if(hour24 === 0) return '24';   // północ
+        return String(hour24);           // 1..23 dosłownie
       }
+      const labelCurrent = hourLabel24(h);
+      const labelNext = hourLabel24(hNext24);
+
+      if(m < 30){
+        activeHours = [{pos: hh12, label: labelCurrent}];
+      } else if(m < 55){
+        activeHours = [{pos: hh12, label: labelCurrent}, {pos: nextHh, label: labelNext}];
+      } else {
+        activeHours = [{pos: nextHh, label: labelNext}];
+      }
+      const activePosMap = {};
+      for(const a of activeHours) activePosMap[a.pos] = a.label;
+
       document.querySelectorAll('.number').forEach(el => {
         const hourVal = parseInt(el.dataset.hour, 10);
-        el.classList.toggle('active', activeHours.includes(hourVal));
+        if(activePosMap[hourVal] !== undefined){
+          el.classList.add('active');
+          el.textContent = activePosMap[hourVal];   // pokaż 13, 14, 24 itp. gdy świeci
+        } else {
+          el.classList.remove('active');
+          el.textContent = String(hourVal);          // wracaj do 1-12 gdy zgaśnie
+        }
       });
     }
 
@@ -1485,40 +1642,38 @@
       const workStartMini=document.getElementById('workStartMini');
       const workEndMini=document.getElementById('workEndMini');
       const exBtn=document.getElementById('exerciseBtn');
-      const exCenter=document.getElementById('exerciseCenter');
       const breakSumMini=document.getElementById('breakSumMini');
       const breakCenter=document.getElementById('breakCenter');
 
       if(startWorkMinutes===null){
         workStartMini.textContent='--:--';
         workEndMini.textContent='';
-        exCenter.textContent='0';
         breakSumMini.textContent='';
         breakCenter.textContent='';
         workBtn.classList.remove('overtime');
         renderWorkRoller(0);
+        renderWheels(0);
       } else {
         const net=getNetWorkMinutes();
         const ex=getEffectiveExerciseElapsed();
         const totalBreak=getTotalBreakMinutes(true);
         workStartMini.textContent=formatHHMM(startWorkMinutes);
         workEndMini.textContent=endWorkMinutes!==null?formatHHMM(endWorkMinutes):'';
-        exCenter.textContent=formatCompact(ex);
         breakSumMini.textContent=totalBreak!==0?formatCompactSigned(totalBreak):'';
         breakCenter.textContent=breakActive?formatCompact(getActiveBreakMinutes()):'';
         workBtn.classList.toggle('overtime', net>480);
         renderWorkRoller(Math.max(0,net));
-      }
-
-      exBtn.classList.remove('alert','blink');
-      if(startWorkMinutes!==null && endWorkMinutes===null){
-        const ex=getEffectiveExerciseElapsed();
-        if(ex>=120){ if(blinkState) exBtn.classList.add('blink'); }
-        else if(ex>=60) exBtn.classList.add('alert');
+        renderWheels(ex);
       }
 
       const breakBtn=document.getElementById('breakBtn');
-      breakBtn.classList.remove('on');
+      breakBtn.classList.remove('on','has-data');
+      // Czy mamy jakieś dane na breakBtn? (suma >0 lub aktywna przerwa)
+      const breakHasData = (
+        (startWorkMinutes!==null) &&
+        (breakActive || getTotalBreakMinutes(true) !== 0)
+      );
+      if(breakHasData) breakBtn.classList.add('has-data');
       if(endWorkMinutes===null && breakActive && blinkState){
         breakBtn.classList.add('on');
       }
@@ -1526,6 +1681,114 @@
       renderPotButton();
       renderMoneyButton();
       renderNotesBar();
+    }
+
+    // === Render kół (12 sztuk, każde = 5 minut) ===
+    // Stan: ile minut minęło od ostatnich ćwiczeń
+    // 0..5 → 12 kół, 5..10 → 11 kół, ... 55..60 → 1 koło
+    // 60+ → tryb "overage" (czerwony licznik nadwyżki minut, max 500min)
+    let _lastWheelsCount = 12;  // do animacji znikania
+    function renderWheels(elapsedMinutes){
+      const grid = document.getElementById('wheelsGrid');
+      const exBtn = document.getElementById('exerciseBtn');
+
+      if(!startWorkMinutes){
+        // Praca nieuruchomiona - pokazujemy 12 kół (stan początkowy)
+        elapsedMinutes = 0;
+      }
+
+      // Limit 500 minut - powyżej zatrzymujemy (porzucona aplikacja)
+      if(elapsedMinutes > 500) elapsedMinutes = 500;
+
+      const wheelsLeft = Math.max(0, 12 - Math.floor(elapsedMinutes / 5));
+
+      if(wheelsLeft <= 0){
+        // Tryb "overage" - czerwony licznik minut nadwyżki
+        exBtn.classList.add('overage');
+        const over = Math.max(1, Math.floor(elapsedMinutes - 60));
+        renderOverageRoller(over);
+        return;
+      }
+      exBtn.classList.remove('overage');
+
+      // Layout per liczba kół: ile kolumn × ile rzędów
+      const layouts = {
+        12: { cols:3, rows:4 },
+        11: { cols:3, rows:4 },
+        10: { cols:3, rows:4 },
+        9:  { cols:3, rows:3 },
+        8:  { cols:3, rows:3 },
+        7:  { cols:3, rows:3 },
+        6:  { cols:3, rows:2 },
+        5:  { cols:3, rows:2 },
+        4:  { cols:2, rows:2 },
+        3:  { cols:3, rows:1 },
+        2:  { cols:2, rows:1 },
+        1:  { cols:1, rows:1 }
+      };
+      const lay = layouts[wheelsLeft] || { cols:3, rows:4 };
+      grid.style.gridTemplateColumns = `repeat(${lay.cols}, 1fr)`;
+      grid.style.gridTemplateRows = `repeat(${lay.rows}, 1fr)`;
+
+      // Buduj DOM jeśli liczba się zmienia
+      if(_lastWheelsCount !== wheelsLeft){
+        // Animacja znikania: pokaż wszystkie z _lastWheelsCount kół, oznacz różnicę jako vanishing
+        const diff = _lastWheelsCount - wheelsLeft;
+        if(diff > 0 && grid.children.length === _lastWheelsCount){
+          // Oznacz pierwsze `diff` kół jako vanishing
+          for(let i=0; i<diff; i++){
+            grid.children[i].classList.add('vanishing');
+          }
+          // Po 3s (czas animacji) - przerysuj siatkę z mniej kołami
+          setTimeout(()=>{
+            buildWheelsGrid(wheelsLeft, lay);
+            _lastWheelsCount = wheelsLeft;
+          }, 3000);
+          return;
+        }
+        // Jeśli liczba urosła (np. po reset / kliknięciu) lub pierwszy render - rebuild od razu
+        buildWheelsGrid(wheelsLeft, lay);
+        _lastWheelsCount = wheelsLeft;
+      }
+    }
+
+    function buildWheelsGrid(count, lay){
+      const grid = document.getElementById('wheelsGrid');
+      grid.style.gridTemplateColumns = `repeat(${lay.cols}, 1fr)`;
+      grid.style.gridTemplateRows = `repeat(${lay.rows}, 1fr)`;
+      clearChildren(grid);
+      for(let i=0; i<count; i++){
+        const w = document.createElement('div');
+        w.className = 'wheel';
+        grid.appendChild(w);
+      }
+    }
+
+    // Rolka nadwyżki - jak workRoller ale z minutami (1..N), 3-cyfrowa
+    function renderOverageRoller(minutes){
+      const roller = document.querySelector('#overageDisplay .work-roller');
+      const inner = document.getElementById('overageRollerInner');
+      if(!roller || !inner) return;
+
+      // Lazy build cyfr 0-9 jako jednostki ones, plus dziesiątek - prostsze: 3 osobne kolumny.
+      // Ale dla zachowania spójności robię prostą wersję: pokazuj liczbę bez animacji, ostre cyfry.
+      // Aktualizacja co 5s wystarczy (z pętli renderAll).
+      // Tu: jedna duża cyfra ze stylem rolki, zmieniamy textContent.
+      if(inner.dataset.built !== '1'){
+        inner.innerHTML = '';
+        const d = document.createElement('div');
+        d.className = 'work-roller-digit';
+        inner.appendChild(d);
+        inner.dataset.built = '1';
+      }
+      const h = roller.clientHeight;
+      const digit = inner.querySelector('.work-roller-digit');
+      if(h && digit){
+        digit.style.height = h + 'px';
+        digit.style.fontSize = Math.floor(h * (String(minutes).length >= 3 ? 0.55 : 0.78)) + 'px';
+      }
+      digit.textContent = minutes;
+      inner.style.transform = 'translateY(0)';
     }
 
     // === Rolka cyfr godzin pracy ===
@@ -2442,6 +2705,8 @@
       PROVIDERS.forEach(p=>revenues[p.key]=0);
       counterStart=null; counterEnd=null; privKmTotal=0;
       potUsedToday=false;
+      // Reset garnka - nawet jeśli był w trakcie grzania albo alarmu z wczoraj
+      potStartedAt=null; potAckedDone=false;
     }
     function softReset(){
       // Pełny reset bez eksportu - na potrzeby testowania / przypadkowego uruchomienia
@@ -2692,8 +2957,11 @@
       const now=nowMinutes();
       lastExerciseMinutes=now;
       exerciseMarkers.push(now);
+      // Reset stanu kół - następny render zbuduje 12 kół od nowa
+      _lastWheelsCount = 12;
       const b=document.getElementById('exerciseBtn');
-      b.classList.remove('alert','blink'); b.classList.add('flash');
+      b.classList.remove('alert','blink','overage');
+      b.classList.add('flash');
       setTimeout(()=>{ b.classList.remove('flash'); renderAll(); }, 2300);
       saveState(); renderAll();
     });
