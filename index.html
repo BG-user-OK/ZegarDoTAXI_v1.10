@@ -128,11 +128,18 @@
     .note-sticker:active{ transform:scale(.96); }
 
     .clock-wrap{
-      width:min(82vw, 56vh); aspect-ratio:1/1;
+      width:min(94vw, 64vh); aspect-ratio:1/1;
       position:relative; display:flex; align-items:center; justify-content:center;
       margin:8px 0;
     }
     .clock-svg{ width:100%; height:100%; display:block; }
+    /* Punkty 4+5: druga warstwa SVG NAD cyframi godzin - dla strzałki i kropki minut */
+    .clock-svg-overlay{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:30;
+    }
     .clock-center{
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
@@ -575,6 +582,12 @@
     }
 
     .work-btn{ background:linear-gradient(180deg,var(--btn-work-off-1),var(--btn-work-off-2)); }
+    /* Punkt 3: wyszarzenie przycisku pracy podczas trwania przerwy */
+    .work-btn.dimmed-during-break{
+      opacity:.45;
+      filter:grayscale(.7);
+      transition:opacity .3s ease, filter .3s ease;
+    }
     .work-btn.on{
       background:linear-gradient(180deg,var(--btn-work-on-1),var(--btn-work-on-2));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.14),
@@ -590,127 +603,6 @@
                   0 0 0 1px rgba(255,154,31,.55);
     }
 
-    .exercise-btn{
-      background:#000;
-      box-shadow:none;
-    }
-    .exercise-btn.flash .wheel{
-      animation:wheelFlash .8s ease;
-    }
-    @keyframes wheelFlash{
-      0%, 100% { box-shadow:0 0 8px rgba(220,220,235,.35), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
-      50% { box-shadow:0 0 20px rgba(56,200,102,.7), 0 0 30px rgba(56,200,102,.4), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
-    }
-
-    /* === Siatka kół === */
-    .wheels-grid{
-      position:absolute;
-      inset:0;
-      display:grid;
-      gap:6%;
-      padding:5%;
-      box-sizing:border-box;
-      align-items:center;
-      justify-items:center;
-      z-index:2;
-    }
-    /* Pojedyncze koło - dopasowuje się do mniejszego wymiaru komórki gridu */
-    .wheel{
-      max-width:100%;
-      max-height:100%;
-      aspect-ratio:1/1;
-      width:min(100%, 100cqh);
-      height:auto;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 50% 50%, #c0c0c8 0%, #909098 18%, #404048 28%, #1a1a1f 32%, #050505 100%);
-      box-shadow:
-        0 0 8px rgba(220,220,235,.35),
-        0 0 14px rgba(200,210,225,.18),
-        inset 0 -3px 6px rgba(0,0,0,.7),
-        inset 0 2px 4px rgba(255,255,255,.15);
-      position:relative;
-    }
-    /* Każda komórka gridu jako container query do mierzenia wysokości */
-    .wheels-grid > *{
-      container-type:size;
-      width:100%; height:100%;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .wheel-cell{ /* wrapper */ }
-    /* Promienie felgi (wewnątrz opony) */
-    .wheel::before{
-      content:'';
-      position:absolute;
-      inset:18%;
-      border-radius:50%;
-      background:
-        radial-gradient(circle, transparent 38%, rgba(20,20,25,.85) 42%, transparent 48%),
-        conic-gradient(from 0deg,
-          #707080, #aaabb5, #707080, #aaabb5, #707080,
-          #aaabb5, #707080, #aaabb5, #707080, #aaabb5,
-          #707080, #aaabb5);
-      box-shadow:inset 0 0 6px rgba(0,0,0,.6);
-    }
-    /* Środkowa nakrętka */
-    .wheel::after{
-      content:'';
-      position:absolute;
-      inset:42%;
-      border-radius:50%;
-      background:radial-gradient(circle, #d8d8e0 0%, #707078 80%, #303038 100%);
-      box-shadow:0 0 3px rgba(0,0,0,.5);
-    }
-    /* Wariant: emoji opony - aktywuje się klasą .wheels-emoji na .wheels-grid */
-    .wheels-grid.wheels-emoji .wheel{
-      background:transparent;
-      box-shadow:none;
-      display:flex; align-items:center; justify-content:center;
-      font-size:80cqmin;
-      filter:drop-shadow(0 0 8px rgba(220,220,235,.5));
-    }
-    .wheels-grid.wheels-emoji .wheel::before,
-    .wheels-grid.wheels-emoji .wheel::after{
-      display:none;
-    }
-    /* Animacja zwijania */
-    .wheel.vanishing{
-      animation:wheelVanish 3s ease-in forwards;
-    }
-    @keyframes wheelVanish{
-      0%   { transform:scale(1); opacity:1; }
-      40%  { transform:scale(.7); opacity:.7;
-             box-shadow:inset 0 0 0 8px #000, 0 0 4px rgba(220,220,235,.2); }
-      70%  { transform:scale(.4); opacity:.4;
-             box-shadow:inset 0 0 0 16px #000; }
-      100% { transform:scale(0); opacity:0; }
-    }
-
-    /* Nakładka licznika nadwyżki (>60min) - czerwone tło z rolką liczby minut */
-    .overage-display{
-      position:absolute;
-      inset:0;
-      z-index:3;
-      background:linear-gradient(180deg, #c01515, #6a0808);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.15),
-        inset 0 -10px 18px rgba(0,0,0,.45),
-        0 0 22px rgba(255,40,40,.35);
-      display:none;
-      border-radius:16px;
-    }
-    .exercise-btn.overage .overage-display{
-      display:block;
-    }
-    .exercise-btn.overage .wheels-grid{
-      display:none;
-    }
-    /* Rolka nadwyżki używa stylów .work-roller, tylko cyfry mają inny kolor */
-    .overage-display .work-roller-digit{
-      color:#fff !important;
-      text-shadow:0 0 6px rgba(255,180,180,.6);
-      border-bottom:2.5px solid rgba(255,200,200,.45);
-    }
     .exercise-btn.flash{
       background:linear-gradient(180deg,var(--btn-ex-on-1),var(--btn-ex-on-2));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.16),
@@ -814,13 +706,92 @@
       font-size:clamp(40px,11vw,64px);
     }
 
-    /* === Koła === */
+    /* === Moduł ćwiczeń: pojedyncze koło z animowaną maską (zanikanie zgodnie z ruchem wskazówek) === */
     .exercise-btn{
       background:#000 !important;
       box-shadow:none !important;
       border-radius:16px;
-      aspect-ratio:1/1.5 !important;
-      align-self:end;
+      overflow:hidden;
+      position:relative;
+    }
+    .wheel-image{
+      position:absolute;
+      inset:0;
+      width:100%; height:100%;
+      object-fit:contain;
+      pointer-events:none;
+      filter:drop-shadow(0 0 10px rgba(220,220,235,.5));
+      /* Maska conic - widoczne koło to czarna część maski.
+         --vanish-angle: 0deg = pełne koło widoczne, 360deg = całe zniknęło.
+         Soft edge ma 30deg szerokości i wyprzedza wskazówkę o ~15deg. */
+      --vanish-angle: 0deg;
+      -webkit-mask-image:
+        conic-gradient(from 0deg at 50% 50%,
+          transparent 0deg,
+          transparent var(--vanish-angle),
+          rgba(0,0,0,0.15) calc(var(--vanish-angle) + 8deg),
+          rgba(0,0,0,0.5)  calc(var(--vanish-angle) + 18deg),
+          rgba(0,0,0,0.85) calc(var(--vanish-angle) + 28deg),
+          black            calc(var(--vanish-angle) + 38deg),
+          black            360deg);
+      mask-image:
+        conic-gradient(from 0deg at 50% 50%,
+          transparent 0deg,
+          transparent var(--vanish-angle),
+          rgba(0,0,0,0.15) calc(var(--vanish-angle) + 8deg),
+          rgba(0,0,0,0.5)  calc(var(--vanish-angle) + 18deg),
+          rgba(0,0,0,0.85) calc(var(--vanish-angle) + 28deg),
+          black            calc(var(--vanish-angle) + 38deg),
+          black            360deg);
+      transition: --vanish-angle 0.95s linear;
+    }
+    /* Tryb przywracania (animacja odwrotna) - ang idzie od aktualnego do 0 w 2s */
+    .wheel-image.restoring{
+      transition: --vanish-angle 2s ease-out;
+    }
+
+    /* Czerwony moduł nadwyżki - jak dotychczas */
+    .overage-display{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      background:linear-gradient(180deg, #c01515, #6a0808);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.15),
+        inset 0 -10px 18px rgba(0,0,0,.45),
+        0 0 22px rgba(255,40,40,.35);
+      display:none;
+      border-radius:16px;
+      transition:opacity 0.6s ease;
+    }
+    .exercise-btn.overage .overage-display{
+      display:block;
+    }
+    .exercise-btn.overage .wheel-image{
+      display:none;
+    }
+    /* Stan "fading-overage": czerwony moduł gaśnie do czerni przed pojawieniem się koła z animacją odwrotną */
+    .exercise-btn.fading-overage .overage-display{
+      opacity:0;
+    }
+    .overage-display .work-roller-digit{
+      color:#fff !important;
+      text-shadow:0 0 6px rgba(255,180,180,.6);
+      border-bottom:2.5px solid rgba(255,200,200,.45);
+    }
+    .exercise-btn.flash{
+      background:linear-gradient(180deg,var(--btn-ex-on-1),var(--btn-ex-on-2));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.16),
+                  inset 0 -12px 16px rgba(0,0,0,.2),
+                  0 0 22px rgba(255,170,63,.45),
+                  0 0 0 1px rgba(255,170,63,.45);
+    }
+
+    /* CSS Houdini - rejestracja --vanish-angle jako kąta dla animacji */
+    @property --vanish-angle {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
     }
 
     /* === Data w środku tarczy - na czarnym kole pod nią === */
@@ -1273,8 +1244,6 @@
         <g id="exerciseMarks"></g>
         <g id="forecastHand"></g>
         <g id="dots"></g>
-        <g id="hourArrow"></g>
-        <g id="minuteDot"></g>
         <!-- Czarne koło pod datą - przykrywa wszystkie kolory tarczy w środku, datę pokazuje na czystym tle -->
         <circle cx="200" cy="200" r="70" fill="#000" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
       </svg>
@@ -1296,6 +1265,12 @@
           <div class="date-center" id="dateCenterEl"></div>
         </div>
       </div>
+
+      <!-- Punkty 4+5: druga warstwa SVG nad cyframi godzin - dla strzałki godzinowej i kropki minut -->
+      <svg class="clock-svg clock-svg-overlay" viewBox="0 0 400 400" aria-hidden="true">
+        <g id="hourArrow"></g>
+        <g id="minuteDot"></g>
+      </svg>
     </div>
 
     <div class="controls">
@@ -1304,7 +1279,7 @@
         <div class="work-split">
           <div class="work-left">
             <div class="work-time-top" id="workStartMini">--:--</div>
-            <div class="work-icon-row">🚕</div>
+            <div class="work-icon-row"></div>
             <div class="work-time-bot" id="workEndMini"></div>
           </div>
           <div class="work-right">
@@ -1318,7 +1293,8 @@
       </button>
 
       <button class="btn exercise-btn" id="exerciseBtn" type="button">
-        <div class="wheels-grid" id="wheelsGrid"></div>
+        <img src="Photos/kolo.png" alt="Koło" class="wheel-image" id="wheelImage"
+             onerror="this.style.display='none'" />
         <div class="overage-display" id="overageDisplay">
           <div class="work-roller" style="position:absolute;top:50%;left:6%;right:6%;transform:translateY(-50%);height:80%;background:rgba(0,0,0,.55);">
             <div class="work-roller-inner" id="overageRollerInner"></div>
@@ -1363,7 +1339,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.26</div>
+  <div class="version">v:1.27</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1390,6 +1366,8 @@
     let exerciseMarkers = [];
     let breakAdjustMinutes = 0;
     let workDate = null;
+    // Punkt 7: planowany cel pracy w minutach (domyślnie 8h = 480min)
+    let workTargetMinutes = 480;
 
     let potDurationMin = 20;
     let potStartedAt = null;
@@ -1417,7 +1395,7 @@
     let keypadCounterDigits = [];
     let keypadCursorFromRight = 0;
 
-    const cx=200, cy=200, radius=180;
+    const cx=200, cy=200, radius=160;
     let blinkState = false;
 
     // ===== localStorage =====
@@ -1428,7 +1406,8 @@
           breakActive, currentBreakStart, breakSegments,
           exerciseMarkers, breakAdjustMinutes, workDate,
           potDurationMin, potStartedAt, potAckedDone, potUsedToday,
-          revenues, counterStart, counterEnd, privKmTotal
+          revenues, counterStart, counterEnd, privKmTotal,
+          workTargetMinutes
         };
         localStorage.setItem(LS_KEY, JSON.stringify(state));
         const persist = { lastCounterEnd, notes };
@@ -1453,6 +1432,7 @@
           potStartedAt = s.potStartedAt ?? null;
           potAckedDone = !!s.potAckedDone;
           potUsedToday = !!s.potUsedToday;
+          workTargetMinutes = s.workTargetMinutes ?? 480;
           // Sanitacja: jeśli pot był uruchomiony >24h temu (np. zostawiony z innego dnia
           // i apka się sama nie wygasiła) - resetujemy. Inaczej miga z zawyżonymi liczbami.
           if(potStartedAt !== null){
@@ -1547,7 +1527,7 @@
 
       // === Strzałka godzinowa - jako polygon (grot strzałki) ===
       const aRad = (hourDeg - 90) * Math.PI / 180;
-      const r1 = 130, r2 = 75;
+      const r1 = 115, r2 = 75;
       // Punkty trzonu strzałki (prostokąt) + grot na końcu (przy cyfrze, r1)
       // Grot ma szerokość większą i kończy się w punkcie r1+8
       const tipR = r1 + 4;        // wierzchołek grotu
@@ -1638,7 +1618,7 @@
     function getActiveBreakMinutes(){ return (breakActive&&currentBreakStart!==null)?diffMinutes(currentBreakStart,effectiveNow()):0; }
     function getTotalBreakMinutes(a=true){ let s=getClosedBreakMinutes()+breakAdjustMinutes; if(a) s+=getActiveBreakMinutes(); return s; }
     function getNetWorkMinutes(){ if(startWorkMinutes===null) return 0; return diffMinutes(startWorkMinutes,effectiveNow()) - getTotalBreakMinutes(true); }
-    function getForecastEndMinutes(){ if(startWorkMinutes===null) return null; return startWorkMinutes + 480 + getTotalBreakMinutes(true); }
+    function getForecastEndMinutes(){ if(startWorkMinutes===null) return null; return startWorkMinutes + workTargetMinutes + getTotalBreakMinutes(true); }
     function getBreakOverlapSince(anchor){
       const total=diffMinutes(anchor,effectiveNow()); let o=0;
       for(const seg of breakSegments){
@@ -1715,7 +1695,7 @@
         const red=createSectorPath(sectorStart,now,radius);
         if(red) nef.appendChild(svgFilledPath(red,'var(--no-exercise-red)',0.78));
       }
-      if(net>480 && forecastEnd!==null){
+      if(net>workTargetMinutes && forecastEnd!==null){
         const s=createSectorPath(forecastEnd,now,radius);
         if(s) ov.appendChild(svgFilledPath(s,'var(--overtime-orange)',0.88));
       }
@@ -1780,7 +1760,7 @@
       if(end===null) return;
       const ang = angleFromMinutes(end);
       const fRad = ang * Math.PI / 180;
-      const r1 = 130, r2 = 60;
+      const r1 = 115, r2 = 75;
       const fx1 = cx + Math.cos(fRad)*r1, fy1 = cy + Math.sin(fRad)*r1;
       const fx2 = cx + Math.cos(fRad)*r2, fy2 = cy + Math.sin(fRad)*r2;
       g.appendChild(svgLine(fx1,fy1,fx2,fy2,'var(--forecast)',5,'8 6'));
@@ -1809,11 +1789,15 @@
         const totalBreak=getTotalBreakMinutes(true);
         workStartMini.textContent=formatHHMM(startWorkMinutes);
         workEndMini.textContent=endWorkMinutes!==null?formatHHMM(endWorkMinutes):'';
-        // Suma przerw - górna 1/3 (jeśli >0 lub jeśli była korekta) - format :MM
-        breakTopZone.textContent = totalBreak !== 0 ? ':' + pad(Math.abs(totalBreak)) : '';
-        // Bieżąca przerwa - dolna 1/3 (tylko gdy aktywna) - format :MM
-        breakBotZone.textContent = breakActive ? ':' + pad(getActiveBreakMinutes()) : '';
-        workBtn.classList.toggle('overtime', net>480);
+        // Punkt 2: gdy pauza aktywna - pokaż tylko dolny (bieżąca pauza); gdy nieaktywna - tylko górny (suma)
+        if(breakActive){
+          breakTopZone.textContent = '';
+          breakBotZone.textContent = ':' + pad(getActiveBreakMinutes());
+        } else {
+          breakTopZone.textContent = totalBreak !== 0 ? ':' + pad(Math.abs(totalBreak)) : '';
+          breakBotZone.textContent = '';
+        }
+        workBtn.classList.toggle('overtime', net>workTargetMinutes);
         renderWorkRoller(Math.max(0,net));
         renderWheels(ex);
       }
@@ -1826,19 +1810,31 @@
         breakBtn.classList.add('on');                  // obrazek przerwa.png stale
         if(blinkState) breakBtn.classList.add('blink-bg');  // tło miga
       }
+      // Punkt 3: przy aktywnej przerwie przycisk pracy wyszarzony
+      workBtn.classList.toggle('dimmed-during-break', breakActive && endWorkMinutes===null);
 
       renderPotButton();
       renderMoneyButton();
       renderNotesBar();
     }
 
-    // === Render kół (12 sztuk, każde = 5 minut) ===
-    // wheels DOM zawiera wszystkie aktualnie widoczne (i znikające) koła.
-    // _wheelsState.count = ile kół ma być widocznych docelowo
-    let _wheelsState = { count: 12, initialized: false };
+    // === Render modułu ćwiczeń ===
+    // Logika: koło ma maskę conic-gradient. --vanish-angle 0..360deg.
+    // 0deg = pełne koło widoczne, 360deg = całe zniknęło.
+    // 60 minut → 360 stopni, czyli 6deg/minuta.
+    // Stan _wheelsState:
+    //   .restoring - czy aktualnie odtwarzamy koło wstecz (po kliknięciu)
+    //   .restoreFromAngle - od jakiego kąta startujemy odtwarzanie (z aktualnego stanu)
+    //   .restoreStartTime - kiedy zaczęliśmy odtwarzanie (do animacji 2s)
+    let _wheelsState = {
+      restoring: false,
+      restoreFromAngle: 0,
+      restoreStartTime: 0
+    };
     function renderWheels(elapsedMinutes){
-      const grid = document.getElementById('wheelsGrid');
       const exBtn = document.getElementById('exerciseBtn');
+      const img = document.getElementById('wheelImage');
+      if(!img) return;
 
       if(!startWorkMinutes){
         elapsedMinutes = 0;
@@ -1846,94 +1842,76 @@
       // Limit 500 minut - powyżej zatrzymujemy
       if(elapsedMinutes > 500) elapsedMinutes = 500;
 
-      const wheelsLeft = Math.max(0, 12 - Math.floor(elapsedMinutes / 5));
+      // === Tryb odtwarzania (po kliknięciu) ===
+      if(_wheelsState.restoring){
+        const dt = (Date.now() - _wheelsState.restoreStartTime) / 1000;
+        const RESTORE_DUR = 2.0; // 2 sekundy
+        if(dt >= RESTORE_DUR){
+          // Odtwarzanie zakończone - zaczyna się nowy cykl
+          _wheelsState.restoring = false;
+          img.style.setProperty('--vanish-angle', '0deg');
+          img.classList.remove('restoring');
+          exBtn.classList.remove('overage','fading-overage');
+          // Zresetuj lastExerciseMinutes już zostało zrobione przy kliknięciu
+          return;
+        }
+        // Liniowa interpolacja z restoreFromAngle do 0
+        const progress = dt / RESTORE_DUR;
+        const ang = _wheelsState.restoreFromAngle * (1 - progress);
+        img.style.setProperty('--vanish-angle', ang.toFixed(2) + 'deg');
+        return;
+      }
 
-      if(wheelsLeft <= 0){
-        // Tryb "overage" - czerwony licznik minut nadwyżki, z ułamkiem dla płynnej animacji
+      // === Tryb normalny: maska zanika zgodnie z upływem minut ===
+      // Frakcyjne minuty dla płynnego ruchu
+      const elapsedFrac = (startWorkMinutes && lastExerciseMinutes!==null && endWorkMinutes===null)
+        ? getEffectiveExerciseElapsedFractional()
+        : elapsedMinutes;
+
+      if(elapsedFrac >= 60){
+        // Tryb "overage" - czerwony licznik minut nadwyżki
         exBtn.classList.add('overage');
-        // Punkt 17: sekundy z zegara dają płynne przewijanie rolki
-        const overFrac = Math.max(0, getEffectiveExerciseElapsedFractional() - 60);
+        img.style.setProperty('--vanish-angle', '360deg');
+        const overFrac = Math.max(0, elapsedFrac - 60);
         renderOverageRoller(overFrac);
         return;
       }
-      exBtn.classList.remove('overage');
+      exBtn.classList.remove('overage','fading-overage');
 
-      // Pierwszy render: zbuduj 12 kół od razu
-      if(!_wheelsState.initialized){
-        buildWheelsGrid(wheelsLeft);
-        _wheelsState.count = wheelsLeft;
-        _wheelsState.initialized = true;
-        return;
-      }
-
-      // Jeśli liczba urosła (reset, klik) - rebuild
-      if(wheelsLeft > _wheelsState.count){
-        buildWheelsGrid(wheelsLeft);
-        _wheelsState.count = wheelsLeft;
-        return;
-      }
-      // Jeśli się nie zmieniła - nic nie rób
-      if(wheelsLeft === _wheelsState.count) return;
-
-      // Liczba zmalała - animuj znikanie pierwszych "diff" kół (po DOM order = czytamy z grida w porządku)
-      const diff = _wheelsState.count - wheelsLeft;
-      _wheelsState.count = wheelsLeft;
-
-      // Pierwsze `diff` aktywnych komórek z .wheel:not(.vanishing). DOM order zgadza się z grid order
-      // bo grid renderuje 1->prawa, potem nowy rząd. Czyli pierwsze [0..diff) to górny-lewy, dalej.
-      const cells = grid.querySelectorAll('.wheel-cell');
-      const toVanish = [];
-      for(let i = 0; i < cells.length; i++){
-        const w = cells[i].querySelector('.wheel:not(.vanishing)');
-        if(w){ toVanish.push(w); if(toVanish.length >= diff) break; }
-      }
-      toVanish.forEach(w => w.classList.add('vanishing'));
-
-      // Po zakończeniu animacji (3s) - przeskaluj siatkę na docelową ilość.
-      // Ważne: rebuild generuje nowy layout, ale to OK bo widzowi już się "spaliły" konkretne koła.
-      setTimeout(()=>{
-        if(_wheelsState.count === wheelsLeft){
-          buildWheelsGrid(wheelsLeft);
-        }
-      }, 3050);
+      // Kąt zaniku: 6deg na minutę (60min = 360deg)
+      const ang = Math.min(360, elapsedFrac * 6);
+      img.style.setProperty('--vanish-angle', ang.toFixed(2) + 'deg');
     }
 
-    function buildWheelsGrid(count){
-      const grid = document.getElementById('wheelsGrid');
-      // Moduł jest portrait (1:1.5) - więcej rzędów niż kolumn
-      const layouts = {
-        12: { cols:3, rows:4 },
-        11: { cols:3, rows:4 },
-        10: { cols:2, rows:5 },
-        9:  { cols:2, rows:5 },   /* 9 w 2x5 = 1 puste, ale lepsza skala */
-        8:  { cols:2, rows:4 },
-        7:  { cols:2, rows:4 },
-        6:  { cols:2, rows:3 },
-        5:  { cols:2, rows:3 },
-        4:  { cols:2, rows:2 },
-        3:  { cols:1, rows:3 },
-        2:  { cols:1, rows:2 },
-        1:  { cols:1, rows:1 }
-      };
-      // Specjalne layouty by koła nie były gigantyczne przy małej liczbie
-      // Limity: max kolumn = 2, max rzędy zależnie od ilości
-      const lay = layouts[count] || { cols:3, rows:4 };
-      grid.style.gridTemplateColumns = `repeat(${lay.cols}, 1fr)`;
-      grid.style.gridTemplateRows = `repeat(${lay.rows}, 1fr)`;
-      clearChildren(grid);
-      // Tryb wybrany w localStorage: 'css' (domyślnie) lub 'emoji'
-      const mode = (localStorage.getItem('wheelsMode') || 'css');
-      grid.classList.toggle('wheels-emoji', mode === 'emoji');
-      for(let i=0; i<count; i++){
-        const cell = document.createElement('div');
-        cell.className = 'wheel-cell';
-        const w = document.createElement('div');
-        w.className = 'wheel';
-        if(mode === 'emoji'){
-          w.textContent = '🛞';
-        }
-        cell.appendChild(w);
-        grid.appendChild(cell);
+    // Rozpoczyna animację przywracania koła (po kliknięciu w przycisk ćwiczeń).
+    // Jeśli był tryb overage - najpierw fade czerwonego modułu do czerni (0.6s),
+    // potem odtwarzanie koła (2s) wstecz po torze zanikania.
+    function startWheelRestore(){
+      const exBtn = document.getElementById('exerciseBtn');
+      const img = document.getElementById('wheelImage');
+      if(!img) return;
+
+      // Jeśli był tryb overage - najpierw fade czerwonego do czerni
+      if(exBtn.classList.contains('overage')){
+        exBtn.classList.add('fading-overage');
+        // Po 0.6s usuwamy klasę overage i startujemy animację odtwarzania
+        setTimeout(()=>{
+          exBtn.classList.remove('overage','fading-overage');
+          // Z trybu overage zaczynamy od 360deg (pełen zanik)
+          _wheelsState.restoring = true;
+          _wheelsState.restoreFromAngle = 360;
+          _wheelsState.restoreStartTime = Date.now();
+          img.classList.add('restoring');
+          renderWheels(0);
+        }, 600);
+      } else {
+        // Z bieżącego stanu zanikania - zacznij animację wstecz od aktualnego kąta
+        const currentAngle = parseFloat(getComputedStyle(img).getPropertyValue('--vanish-angle')) || 0;
+        _wheelsState.restoring = true;
+        _wheelsState.restoreFromAngle = currentAngle;
+        _wheelsState.restoreStartTime = Date.now();
+        img.classList.add('restoring');
+        renderWheels(0);
       }
     }
 
@@ -2349,7 +2327,16 @@
         hT=`${s}${pad(Math.floor(a/60))}`; mT=pad(a%60); lab='Korekta sumy przerw (+/-)';
       } else if(editMode==='pot'){
         hT=pad(Math.floor(editPotMinutes/60)); mT=pad(editPotMinutes%60); lab='Czas grzania obiadu';
+      } else if(editMode==='target'){
+        hT=pad(Math.floor(workTargetMinutes/60)); mT=pad(workTargetMinutes%60); lab='Cel pracy (godziny dziś)';
       }
+      // Punkt 7: w trybie 'start' dodatkowo widać i można edytować cel pracy
+      const targetSection = editMode==='start' ? `
+        <div style="text-align:center; margin-top:14px; padding-top:14px; border-top:1px solid #2a2a2a;">
+          <div class="keypad-label" style="opacity:.7;">Cel pracy: <strong style="color:#7adf8a;">${pad(Math.floor(workTargetMinutes/60))}:${pad(workTargetMinutes%60)}</strong></div>
+          <button class="ok-btn" data-act="editTarget" style="margin-top:8px;width:auto;padding:0 18px;font-size:15px;height:42px;background:linear-gradient(180deg,#2a4a2a,#1a3a1a);">Zmień cel</button>
+        </div>
+      ` : '';
       showOverlay(`
         <div class="editor">
           <div class="keypad-label" style="text-align:center;padding-top:8px;">${lab}</div>
@@ -2366,6 +2353,7 @@
               <button class="arrow-btn" data-act="mDn">▼</button>
             </div>
           </div>
+          ${targetSection}
           <div class="editor-actions">
             <button class="cancel-btn" data-act="cancel">✕</button>
             <button class="ok-btn" data-act="ok">✓</button>
@@ -2378,6 +2366,7 @@
     }
     function timeEditorAction(a){
       if(a==='cancel'){ hideOverlay(); return; }
+      if(a==='editTarget'){ openTimeEditor('target'); return; }
       if(a==='ok'){
         if(editMode==='start'){
           setWorkStart(editHour*60+editMinute, true);
@@ -2387,6 +2376,11 @@
         } else if(editMode==='pot'){
           potDurationMin = Math.max(1, editPotMinutes);
           saveState(); renderAll();
+        } else if(editMode==='target'){
+          // Cel zatwierdzony - wracamy do edytora startu
+          saveState(); renderAll();
+          openTimeEditor('start');
+          return;
         }
         hideOverlay(); return;
       }
@@ -2405,6 +2399,12 @@
         if(a==='hDn') editPotMinutes=Math.max(1,editPotMinutes-60);
         if(a==='mUp') editPotMinutes=Math.min(999,editPotMinutes+1);
         if(a==='mDn') editPotMinutes=Math.max(1,editPotMinutes-1);
+      } else if(editMode==='target'){
+        // Cel pracy - od 1h do 16h
+        if(a==='hUp') workTargetMinutes=Math.min(960, workTargetMinutes+60);
+        if(a==='hDn') workTargetMinutes=Math.max(60, workTargetMinutes-60);
+        if(a==='mUp') workTargetMinutes=Math.min(960, workTargetMinutes+15);
+        if(a==='mDn') workTargetMinutes=Math.max(60, workTargetMinutes-15);
       }
       renderTimeEditor();
     }
@@ -2905,6 +2905,8 @@
       potUsedToday=false;
       // Reset garnka - nawet jeśli był w trakcie grzania albo alarmu z wczoraj
       potStartedAt=null; potAckedDone=false;
+      // Punkt 7: cel godzinowy wraca do domyślnych 8h
+      workTargetMinutes=480;
     }
     function softReset(){
       // Pełny reset bez eksportu - na potrzeby testowania / przypadkowego uruchomienia
@@ -3137,6 +3139,14 @@
           confirmEndAndFinish();
           return;
         }
+        // Punkt 3: jeśli trwa przerwa - najpierw ją zakończ, potem standardowa procedura
+        if(breakActive && currentBreakStart!==null){
+          const now=nowMinutes();
+          breakSegments.push({ start:currentBreakStart, end:now });
+          breakActive = false;
+          currentBreakStart = null;
+          saveState(); renderAll();
+        }
         if(startWorkMinutes!==null && endWorkMinutes===null){
           // praca trwa - włącz zabezpieczenie zamiast od razu kończyć
           startEndConfirm();
@@ -3149,51 +3159,16 @@
       ()=> openTimeEditor('start')
     );
 
-    // === EXERCISE - klik = reset, long-press 3s = przełącz tryb kół (CSS ↔ emoji) ===
-    (function setupExerciseLongPress(){
-      const btn = document.getElementById('exerciseBtn');
-      let pressTimer = null;
-      let longFired = false;
-      function start(e){
-        longFired = false;
-        btn.classList.add('lp-active');
-        pressTimer = setTimeout(()=>{
-          longFired = true;
-          btn.classList.remove('lp-active');
-          // Przełącz tryb i pokaż toast
-          const cur = localStorage.getItem('wheelsMode') || 'css';
-          const next = cur === 'css' ? 'emoji' : 'css';
-          localStorage.setItem('wheelsMode', next);
-          showToast('Tryb kół: ' + (next === 'emoji' ? 'emoji 🛞' : 'CSS (felgi)'), 'ok');
-          _wheelsState = { count: _wheelsState.count, initialized: false };
-          renderAll();
-          if(navigator.vibrate){ try{ navigator.vibrate([60,40,60]); }catch(e){} }
-        }, 3000);
-      }
-      function endP(){
-        clearTimeout(pressTimer);
-        btn.classList.remove('lp-active');
-        if(longFired) return;
-        // Krótki klik = ćwiczenia
-        if(startWorkMinutes===null || endWorkMinutes!==null) return;
-        const now=nowMinutes();
-        lastExerciseMinutes=now;
-        exerciseMarkers.push(now);
-        _wheelsState = { count: 12, initialized: false };
-        btn.classList.remove('alert','blink','overage');
-        btn.classList.add('flash');
-        setTimeout(()=>{ btn.classList.remove('flash'); renderAll(); }, 2300);
-        saveState(); renderAll();
-      }
-      function cancel(){
-        clearTimeout(pressTimer);
-        btn.classList.remove('lp-active');
-      }
-      btn.addEventListener('pointerdown', start);
-      btn.addEventListener('pointerup', endP);
-      btn.addEventListener('pointerleave', cancel);
-      btn.addEventListener('pointercancel', cancel);
-    })();
+    // === EXERCISE - klik = przywracanie koła z animacją ===
+    document.getElementById('exerciseBtn').addEventListener('click', ()=>{
+      if(startWorkMinutes===null || endWorkMinutes!==null) return;
+      const now=nowMinutes();
+      lastExerciseMinutes=now;
+      exerciseMarkers.push(now);
+      saveState();
+      // Uruchom animację przywracania koła
+      startWheelRestore();
+    });
 
     // === BREAK ===
     setupLongPress(
@@ -3322,13 +3297,17 @@
 
     setInterval(()=>{ blinkState=!blinkState; renderAll(); }, 1000);
 
-    // 100ms: płynna animacja radaru i ognia garnka
+    // 100ms: płynna animacja radaru, ognia garnka, przywracania koła
     setInterval(()=>{
       if(startWorkMinutes!==null && lastExerciseMinutes!==null && getEffectiveExerciseElapsed()>60){
         renderRadarSweep();
       }
       if(potStartedAt!==null){
         renderPotButton();
+      }
+      // Animacja przywracania koła trwa 2s - aktualizuj klatki
+      if(_wheelsState.restoring){
+        renderWheels(0);
       }
     }, 100);
 
