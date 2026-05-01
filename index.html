@@ -212,7 +212,7 @@
     }
     .btn{
       position:relative; border:none; border-radius:16px;
-      aspect-ratio:1/1.33; min-height:108px;
+      aspect-ratio:1/1; min-height:84px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.08),
                   inset 0 -12px 16px rgba(0,0,0,.34),
                   0 0 0 1px rgba(0,0,0,.55);
@@ -707,72 +707,96 @@
                   0 0 0 1px rgba(255,90,71,.52);
     }
 
-    /* === Przerwa - jasnoszare tło, obrazek (auto+człowiek) wypełnia środek === */
+    /* === Przerwa === */
     .break-btn{
       background:#aaaaaa;
       transition:background .25s ease;
     }
     .break-img{
-      position:absolute;
-      inset:0;
+      position:absolute; inset:0;
       width:100%; height:100%;
       object-fit:contain;
-      z-index:1;
-      pointer-events:none;
+      z-index:1; pointer-events:none;
     }
-    .break-btn.no-img{
-      background:linear-gradient(180deg,var(--btn-break-off-1),var(--btn-break-off-2));
-    }
-    /* Strefy tekstowe - górna 1/3 dla sumy, dolna 1/3 dla bieżącej przerwy */
+    .break-img-off{ display:block; }
+    .break-img-on{ display:none; }
+    .break-btn.on .break-img-off{ display:none; }
+    .break-btn.on .break-img-on{ display:block; }
     .break-top-zone, .break-bot-zone{
       position:absolute;
-      left:0; right:0;
+      left:5%; width:50%;
       height:33%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:clamp(28px, 7.5vw, 44px);
-      font-weight:900;
-      color:#1a1a1a;
-      letter-spacing:-1px;
-      z-index:3;
-      pointer-events:none;
-      text-shadow:
-        0 0 6px rgba(255,255,255,.85),
-        0 1px 0 rgba(255,255,255,.6);
+      display:flex; align-items:center; justify-content:flex-start;
+      font-size:clamp(18px,5vw,28px); font-weight:900;
+      color:#1a1a1a; z-index:3; pointer-events:none;
+      text-shadow:0 0 6px rgba(255,255,255,.85),0 1px 0 rgba(255,255,255,.6);
       font-variant-numeric:tabular-nums;
     }
     .break-top-zone{ top:0; }
     .break-bot-zone{ bottom:0; }
-    /* Miganie podczas aktywnej przerwy: jasnoszare ↔ żółty - obrazek pozostaje */
     .break-btn.on{
       background:#ffe84d !important;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -12px 16px rgba(0,0,0,.1),
-        0 0 24px rgba(255,232,77,.55),
-        0 0 0 1px rgba(255,232,77,.55);
-    }
-    .break-btn.on{
-      background:linear-gradient(180deg,var(--btn-break-on-1),var(--btn-break-on-2));
-      color:#272100;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.22),
-                  inset 0 -12px 16px rgba(0,0,0,.1),
-                  0 0 24px rgba(255,232,77,.55),
-                  0 0 0 1px rgba(255,232,77,.55);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.22),
+                 0 0 24px rgba(255,232,77,.55),
+                 0 0 0 1px rgba(255,232,77,.55);
     }
 
+    /* === Garnek z obrazkiem === */
     .pot-btn{ background:linear-gradient(180deg,var(--btn-pot-off-1),var(--btn-pot-off-2)); }
     .pot-btn.done-alarm{ background:linear-gradient(180deg,#ff5050,#ff3030); box-shadow:inset 0 0 0 1px rgba(255,200,200,.4), 0 0 30px rgba(255,48,48,.7); }
     .pot-btn.done-alarm-off{ background:linear-gradient(180deg,#3a0000,#1a0000); }
-    /* pasek ognia rosnący od dołu podczas grzania */
+    .pot-btn.pot-has-img{ background:#000 !important; }
+    .pot-img{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:contain; z-index:1; pointer-events:none;
+    }
+    /* Licznik garnka: okienko 250x15 na 400x400 = 62.5%x3.75%, rozmiar 106x105 = 26.5%x26.25%
+       Środek: left=75.75%, top=16.875% */
+    .pot-counter-box{
+      position:absolute;
+      left:75.75%; top:16.875%;
+      transform:translate(-50%,-50%);
+      z-index:4;
+      font-size:clamp(18px,5vw,32px); font-weight:900;
+      color:#fff;
+      text-shadow:0 0 6px rgba(0,0,0,.9),0 1px 0 rgba(0,0,0,.7);
+      font-variant-numeric:tabular-nums;
+      line-height:1; pointer-events:none;
+    }
+    /* Gdy brak obrazka - centralnie i większa czcionka */
+    .pot-btn:not(.pot-has-img) .pot-counter-box{
+      left:50%; top:50%;
+      font-size:clamp(40px,11vw,64px);
+    }
     .pot-fire-bar{
       position:absolute; bottom:0; left:0; right:0;
       background:linear-gradient(0deg,#7a0000,#d42020);
       border-radius:0 0 14px 14px;
-      z-index:1;
-      transition:height 0.8s linear;
+      z-index:2; transition:height 0.8s linear;
       pointer-events:none;
+    }
+
+    /* === Koła - aspect ratio === */
+    .exercise-btn{
+      background:#000 !important;
+      box-shadow:none !important;
+      border-radius:16px;
+      aspect-ratio:1/1.5 !important;
+    }
+
+    /* === Data w środku tarczy === */
+    .date-center{
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      z-index:20;
+      text-align:center; pointer-events:none;
+      font-size:clamp(13px,3.4vw,19px);
+      font-weight:800;
+      color:var(--dial-number);
+      line-height:1.25;
+      text-shadow:0 0 8px rgba(220,220,225,.55),0 0 16px rgba(200,200,210,.35);
     }
 
     .money-btn{ background:linear-gradient(180deg,var(--btn-money-1),var(--btn-money-2)); }
@@ -1189,6 +1213,12 @@
         </div>
       </div>
       <svg class="clock-svg" viewBox="0 0 400 400" aria-hidden="true">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
         <g id="workFill"></g>
         <g id="noExerciseFill"></g>
         <g id="radarSweep"></g>
@@ -1197,8 +1227,9 @@
         <g id="exerciseMarks"></g>
         <g id="forecastHand"></g>
         <g id="dots"></g>
-        <g id="hands"></g>
-        <circle cx="200" cy="200" r="7" fill="#f0f0f0"/>
+        <g id="hourArrow"></g>
+        <g id="minuteDot"></g>
+        <circle cx="200" cy="200" r="5" fill="#f0f0f0" opacity="0.6"/>
       </svg>
 
       <div class="clock-center">
@@ -1215,11 +1246,10 @@
           <div class="number" data-hour="9" style="top:50%; left:1%;">9</div>
           <div class="number" data-hour="10" style="top:28%; left:9%;">10</div>
           <div class="number" data-hour="11" style="top:9%; left:25%;">11</div>
+          <div class="date-center" id="dateCenterEl"></div>
         </div>
       </div>
     </div>
-
-    <div class="date-display" id="dateDisplay"></div>
 
     <div class="controls">
       <button class="btn work-btn" id="workBtn" type="button">
@@ -1251,9 +1281,11 @@
 
       <button class="btn break-btn" id="breakBtn" type="button">
         <div class="lp-ring"></div>
-        <img src="Photos/przerwa.png" alt="Przerwa" class="break-img" id="breakImg"
+        <img src="Photos/przerwa-off.png" alt="Przerwa" class="break-img break-img-off" id="breakImgOff"
              onload="this.parentElement.classList.add('has-img')"
-             onerror="this.style.display='none';this.parentElement.classList.add('no-img')" />
+             onerror="this.style.display='none'" />
+        <img src="Photos/przerwa.png" alt="Przerwa" class="break-img break-img-on" id="breakImgOn"
+             onerror="this.style.display='none'" />
         <div class="break-top-zone" id="breakTopZone"></div>
         <div class="break-bot-zone" id="breakBotZone"></div>
       </button>
@@ -1261,9 +1293,10 @@
       <button class="btn pot-btn" id="potBtn" type="button">
         <div class="lp-ring"></div>
         <div class="pot-fire-bar" id="potFireBar" style="height:0%"></div>
-        <div class="btn-inner">
-          <div class="center-big" id="potCenter">🫕</div>
-        </div>
+        <img src="Photos/gotowanie.png" alt="Gotowanie" class="pot-img" id="potImg"
+             onload="this.parentElement.classList.add('pot-has-img')"
+             onerror="this.style.display='none'" />
+        <div class="pot-counter-box" id="potCenter">🫕</div>
       </button>
 
       <button class="btn money-btn" id="moneyBtn" type="button">
@@ -1283,7 +1316,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.23</div>
+  <div class="version">v:1.24</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1453,70 +1486,83 @@
       }
     }
 
-    // ===== wskazówki (trójkąty, obwódka, minutowa na wierzchu) =====
+    // ===== wskazówki: kropka minut + strzałka godzin =====
     function renderHands(){
-      const g=document.getElementById('hands');
-      clearChildren(g);
-      const now=new Date();
-      const h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
-      const hourDeg=(h%12)*30 + m*0.5;
-      const minDeg=m*6 + s*0.1;
+      const gHour = document.getElementById('hourArrow');
+      const gMin  = document.getElementById('minuteDot');
+      clearChildren(gHour); clearChildren(gMin);
 
-      function tri(len, halfW, angDeg, fill){
-        const rad=(angDeg-90)*Math.PI/180;
-        const dX=Math.cos(rad), dY=Math.sin(rad);
-        const pX=-dY, pY=dX;
-        const tipX=cx+dX*len, tipY=cy+dY*len;
-        const bX=cx-dX*6, bY=cy-dY*6;
-        const blX=bX+pX*halfW, blY=bY+pY*halfW;
-        const brX=bX-pX*halfW, brY=bY-pY*halfW;
-        const p=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-        p.setAttribute('points',`${tipX},${tipY} ${blX},${blY} ${brX},${brY}`);
-        p.setAttribute('fill',fill);
-        p.setAttribute('stroke','var(--hand-outline)');
-        p.setAttribute('stroke-width','1.6');
-        p.setAttribute('stroke-linejoin','round');
-        return p;
-      }
-      // godzinowa (pod spodem), skrócona o 1/3
-      g.appendChild(tri(100, 12, hourDeg, 'var(--hand-hour)'));
-      // minutowa na wierzchu
-      g.appendChild(tri(150, 7, minDeg, 'var(--hand-minute)'));
+      const now = new Date();
+      const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+      const hourDeg = (h % 12) * 30 + m * 0.5;
+      const minDeg  = m * 6 + s * 0.1;
 
-      // === Podświetlenie aktualnej godziny (zmiana 14) ===
-      // Reguła: 0..30 min świeci tylko aktualna godzina, 30..55 świecą obie (akt + następna),
-      // 55..60 świeci tylko następna.
-      let activeHours = [];
+      // === Strzałka godzinowa ===
+      // Zaczyna się blisko cyfry godzinowej (r≈130) i kończy w połowie drogi do środka (r≈60).
+      // Gruba biała z czarną obwódką.
+      const aRad = (hourDeg - 90) * Math.PI / 180;
+      const r1 = 130, r2 = 60; // od r1 (przy cyfrze) do r2 (do środka)
+      const ax1 = cx + Math.cos(aRad) * r1, ay1 = cy + Math.sin(aRad) * r1;
+      const ax2 = cx + Math.cos(aRad) * r2, ay2 = cy + Math.sin(aRad) * r2;
+      // Obwódka
+      const hOut = document.createElementNS('http://www.w3.org/2000/svg','line');
+      hOut.setAttribute('x1',ax1); hOut.setAttribute('y1',ay1);
+      hOut.setAttribute('x2',ax2); hOut.setAttribute('y2',ay2);
+      hOut.setAttribute('stroke','#000'); hOut.setAttribute('stroke-width','13');
+      hOut.setAttribute('stroke-linecap','round');
+      gHour.appendChild(hOut);
+      // Wypełnienie białe
+      const hIn = document.createElementNS('http://www.w3.org/2000/svg','line');
+      hIn.setAttribute('x1',ax1); hIn.setAttribute('y1',ay1);
+      hIn.setAttribute('x2',ax2); hIn.setAttribute('y2',ay2);
+      hIn.setAttribute('stroke','#ffffff'); hIn.setAttribute('stroke-width','8');
+      hIn.setAttribute('stroke-linecap','round');
+      gHour.appendChild(hIn);
+
+      // === Kropka minut na obwodzie + liczba minut na zewnątrz ===
+      const mRad = (minDeg - 90) * Math.PI / 180;
+      const dotR = radius; // na obwodzie (180)
+      const dotX = cx + Math.cos(mRad) * dotR, dotY = cy + Math.sin(mRad) * dotR;
+      // Biała kropka
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx', dotX.toFixed(2)); dot.setAttribute('cy', dotY.toFixed(2));
+      dot.setAttribute('r','6'); dot.setAttribute('fill','#ffffff');
+      dot.setAttribute('filter','url(#glow)');
+      gMin.appendChild(dot);
+      // Etykieta minut po zewnętrznej stronie
+      const lblR = radius + 18;
+      const lblX = cx + Math.cos(mRad) * lblR, lblY = cy + Math.sin(mRad) * lblR;
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x', lblX.toFixed(2)); lbl.setAttribute('y', lblY.toFixed(2));
+      lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('dominant-baseline','central');
+      lbl.setAttribute('fill','#fff'); lbl.setAttribute('font-size','16');
+      lbl.setAttribute('font-weight','800'); lbl.setAttribute('font-family','inherit');
+      lbl.setAttribute('opacity','0.9');
+      lbl.style.textShadow = '0 0 4px rgba(255,255,255,.6)';
+      lbl.textContent = String(m);
+      gMin.appendChild(lbl);
+
+      // === Podświetlenie aktualnej godziny (tryb 24h dla świecących) ===
       const hh12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
       const hNext24 = (h + 1) % 24;
       const nextHh = hNext24 === 0 ? 12 : (hNext24 > 12 ? hNext24 - 12 : hNext24);
-
-      // Funkcja: dla godziny w 24h (0..23) zwraca napis który ma być wyświetlony
-      function hourLabel24(hour24){
-        if(hour24 === 0) return '24';   // północ
-        return String(hour24);           // 1..23 dosłownie
-      }
+      function hourLabel24(hour24){ return hour24 === 0 ? '24' : String(hour24); }
       const labelCurrent = hourLabel24(h);
       const labelNext = hourLabel24(hNext24);
-
-      if(m < 30){
-        activeHours = [{pos: hh12, label: labelCurrent}];
-      } else if(m < 55){
-        activeHours = [{pos: hh12, label: labelCurrent}, {pos: nextHh, label: labelNext}];
-      } else {
-        activeHours = [{pos: nextHh, label: labelNext}];
-      }
+      let activeHours = [];
+      if(m < 30)       activeHours = [{pos:hh12, label:labelCurrent}];
+      else if(m < 55)  activeHours = [{pos:hh12, label:labelCurrent},{pos:nextHh, label:labelNext}];
+      else             activeHours = [{pos:nextHh, label:labelNext}];
       const activePosMap = {};
       for(const a of activeHours) activePosMap[a.pos] = a.label;
-
       document.querySelectorAll('.number').forEach(el => {
         const hourVal = parseInt(el.dataset.hour, 10);
         if(activePosMap[hourVal] !== undefined){
           el.classList.add('active');
-          el.textContent = activePosMap[hourVal];   // pokaż 13, 14, 24 itp. gdy świeci
+          el.textContent = activePosMap[hourVal];
         } else {
           el.classList.remove('active');
-          el.textContent = String(hourVal);          // wracaj do 1-12 gdy zgaśnie
+          el.textContent = String(hourVal);
         }
       });
     }
@@ -1647,7 +1693,7 @@
       clearChildren(g);
       for(const mk of exerciseMarkers){
         const d=createSectorPath(mk-1.3,mk+1.3,radius);
-        if(d) g.appendChild(svgFilledPath(d,'var(--exercise)',0.95));
+        if(d) g.appendChild(svgFilledPath(d,'#1a8a3a',0.98));
       }
     }
 
@@ -1656,8 +1702,12 @@
       clearChildren(g);
       const end=getForecastEndMinutes();
       if(end===null) return;
-      const p=polarToCartesian(cx,cy,radius-4,angleFromMinutes(end));
-      g.appendChild(svgLine(cx,cy,p.x,p.y,'var(--forecast)',5,'10 10'));
+      const ang = angleFromMinutes(end);
+      const fRad = ang * Math.PI / 180;
+      const r1 = 130, r2 = 60;
+      const fx1 = cx + Math.cos(fRad)*r1, fy1 = cy + Math.sin(fRad)*r1;
+      const fx2 = cx + Math.cos(fRad)*r2, fy2 = cy + Math.sin(fRad)*r2;
+      g.appendChild(svgLine(fx1,fy1,fx2,fy2,'var(--forecast)',5,'8 6'));
     }
 
     // ===== przyciski =====
@@ -1764,18 +1814,19 @@
 
     function buildWheelsGrid(count){
       const grid = document.getElementById('wheelsGrid');
+      // Orientacja portrait (przycisk 1:1.5) - więcej wierszy niż kolumn
       const layouts = {
         12: { cols:3, rows:4 },
         11: { cols:3, rows:4 },
-        10: { cols:3, rows:4 },
+        10: { cols:2, rows:5 },
         9:  { cols:3, rows:3 },
-        8:  { cols:3, rows:3 },
-        7:  { cols:3, rows:3 },
-        6:  { cols:3, rows:2 },
-        5:  { cols:3, rows:2 },
+        8:  { cols:2, rows:4 },
+        7:  { cols:2, rows:4 },
+        6:  { cols:2, rows:3 },
+        5:  { cols:2, rows:3 },
         4:  { cols:2, rows:2 },
-        3:  { cols:3, rows:1 },
-        2:  { cols:2, rows:1 },
+        3:  { cols:1, rows:3 },
+        2:  { cols:1, rows:2 },
         1:  { cols:1, rows:1 }
       };
       const lay = layouts[count] || { cols:3, rows:4 };
@@ -1789,31 +1840,48 @@
       }
     }
 
-    // Rolka nadwyżki - jak workRoller ale z minutami (1..N), 3-cyfrowa
+    // Rolka nadwyżki - pełne przewijanie jak workRoller, minuty od 1 w górę
     function renderOverageRoller(minutes){
       const roller = document.querySelector('#overageDisplay .work-roller');
       const inner = document.getElementById('overageRollerInner');
       if(!roller || !inner) return;
 
-      // Lazy build cyfr 0-9 jako jednostki ones, plus dziesiątek - prostsze: 3 osobne kolumny.
-      // Ale dla zachowania spójności robię prostą wersję: pokazuj liczbę bez animacji, ostre cyfry.
-      // Aktualizacja co 5s wystarczy (z pętli renderAll).
-      // Tu: jedna duża cyfra ze stylem rolki, zmieniamy textContent.
+      // Lazy build: cyfry 0..180 (zapas)
+      const MAX_MIN = 180;
       if(inner.dataset.built !== '1'){
-        inner.innerHTML = '';
-        const d = document.createElement('div');
-        d.className = 'work-roller-digit';
-        inner.appendChild(d);
-        inner.dataset.built = '1';
+        inner.innerHTML='';
+        for(let i=0; i<=MAX_MIN; i++){
+          const d = document.createElement('div');
+          d.className = 'work-roller-digit';
+          inner.appendChild(d);
+          d.textContent = i;
+        }
+        inner.dataset.built='1';
       }
+
       const h = roller.clientHeight;
-      const digit = inner.querySelector('.work-roller-digit');
-      if(h && digit){
-        digit.style.height = h + 'px';
-        digit.style.fontSize = Math.floor(h * (String(minutes).length >= 3 ? 0.55 : 0.78)) + 'px';
+      if(!h) return;
+
+      const digitH = Math.round(h * 0.55);
+
+      if(inner.dataset.lastH !== String(h)){
+        inner.querySelectorAll('.work-roller-digit').forEach(d => {
+          d.style.height = digitH + 'px';
+          // Dla 3-cyfrowych - mniejsza czcionka
+          const n = parseInt(d.textContent, 10);
+          d.style.fontSize = (n >= 100
+            ? Math.floor(digitH * 0.52)
+            : Math.floor(digitH * 0.78)) + 'px';
+        });
+        inner.dataset.lastH = String(h);
       }
-      digit.textContent = minutes;
-      inner.style.transform = 'translateY(0)';
+
+      const clamped = Math.min(MAX_MIN, Math.max(0, minutes));
+      // Frac: aktualizacja co 5s - minuty pełne, bez frakcji żeby nie skakało
+      const baseOffset = (h / 2) - (digitH / 2);
+      const offset = baseOffset - clamped * digitH;
+      inner.style.transition = 'transform 0.6s ease';
+      inner.style.transform = `translateY(${offset}px)`;
     }
 
     // === Rolka cyfr godzin pracy ===
@@ -1888,33 +1956,39 @@
       btn.classList.remove('done-alarm','done-alarm-off','dimmed');
 
       if(potStartedAt===null){
-        // spoczynek - duże 🫕 na środku
-        ctr.textContent='🫕';
+        // spoczynek - gdy jest obrazek: ukryj counter-box; gdy brak: emoji garnek
+        if(btn.classList.contains('pot-has-img')){
+          ctr.removeAttribute('data-show');
+          ctr.textContent='';
+        } else {
+          ctr.textContent='🫕';
+        }
         if(bar) bar.style.height='0%';
-        // jeśli już dziś grzał - subtelnie przygaszony
         if(potUsedToday) btn.classList.add('dimmed');
         return;
       }
+      // Gdy grzeje - zawsze pokaż licznik (data-show żeby CSS go pokazał)
+      ctr.setAttribute('data-show','1');
       const rem=potRemainingSeconds();
       const totalSec=potDurationMin*60;
       const elapsedSec=totalSec - rem;
       if(rem>0){
-        // grzanie - pasek rośnie od dołu, liczba odlicza w dół
         const pct=Math.min(100,(elapsedSec/totalSec)*100);
         if(bar) bar.style.height=pct.toFixed(1)+'%';
         ctr.textContent=Math.ceil(rem/60);
       } else {
-        // czas minął, grzanie nadal trwa do potwierdzenia, licznik liczy CAŁOŚCIOWO
-        // Pasek znika żeby tło przycisku miało szansę migać (done-alarm/done-alarm-off)
         if(bar) bar.style.height='0%';
         if(!potAckedDone){
           btn.classList.add(blinkState?'done-alarm':'done-alarm-off');
-          // pokaż łączny czas grzania w minutach (od startu, nie od alarmu)
           const totalMin=Math.ceil(elapsedSec/60);
           ctr.textContent=totalMin;
         } else {
-          // potwierdzono wyłączenie - resetujemy timer ale flagujemy że dziś już grzał
-          ctr.textContent='🫕';
+          if(btn.classList.contains('pot-has-img')){
+            ctr.removeAttribute('data-show');
+            ctr.textContent='';
+          } else {
+            ctr.textContent='🫕';
+          }
           potStartedAt=null;
           potAckedDone=false;
           potUsedToday=true;
@@ -2114,12 +2188,12 @@
 
     // === Data pod zegarem ===
     function renderDate(){
-      const el = document.getElementById('dateDisplay');
+      const el = document.getElementById('dateCenterEl');
       if(!el) return;
       const days = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
       const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
       const d = new Date();
-      el.textContent = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+      el.innerHTML = `<div>${days[d.getDay()]}</div><div>${d.getDate()} ${months[d.getMonth()]}</div>`;
     }
 
     // === Bateria w prawym górnym rogu ===
