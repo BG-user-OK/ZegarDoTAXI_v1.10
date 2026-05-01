@@ -777,12 +777,11 @@
       pointer-events:none;
     }
 
-    /* === Koła - aspect ratio === */
+    /* === Koła === */
     .exercise-btn{
       background:#000 !important;
       box-shadow:none !important;
       border-radius:16px;
-      aspect-ratio:1/1.5 !important;
     }
 
     /* === Data w środku tarczy === */
@@ -1316,7 +1315,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.24</div>
+  <div class="version">v:1.25</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1814,16 +1813,16 @@
 
     function buildWheelsGrid(count){
       const grid = document.getElementById('wheelsGrid');
-      // Orientacja portrait (przycisk 1:1.5) - więcej wierszy niż kolumn
+      // Przycisk jest kwadratowy. Siatki tak by koła były możliwie duże.
       const layouts = {
         12: { cols:3, rows:4 },
         11: { cols:3, rows:4 },
-        10: { cols:2, rows:5 },
+        10: { cols:3, rows:4 },
         9:  { cols:3, rows:3 },
-        8:  { cols:2, rows:4 },
-        7:  { cols:2, rows:4 },
-        6:  { cols:2, rows:3 },
-        5:  { cols:2, rows:3 },
+        8:  { cols:3, rows:3 },
+        7:  { cols:3, rows:3 },
+        6:  { cols:3, rows:2 },
+        5:  { cols:3, rows:2 },
         4:  { cols:2, rows:2 },
         3:  { cols:1, rows:3 },
         2:  { cols:1, rows:2 },
