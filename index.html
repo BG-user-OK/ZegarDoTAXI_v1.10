@@ -128,8 +128,9 @@
     .note-sticker:active{ transform:scale(.96); }
 
     .clock-wrap{
-      width:min(94vw, 64vh); aspect-ratio:1/1;
+      width:min(82vw, 56vh); aspect-ratio:1/1;
       position:relative; display:flex; align-items:center; justify-content:center;
+      margin:8px 0;
     }
     .clock-svg{ width:100%; height:100%; display:block; }
     .clock-center{
@@ -157,7 +158,13 @@
     .controls{
       width:min(96vw, 620px);
       display:grid; grid-template-columns:repeat(3, 1fr);
-      grid-auto-rows:1fr; gap:6px; align-items:stretch;
+      grid-auto-rows:1fr; gap:6px;
+      align-items:end;
+    }
+    /* Moduł 2 (ćwiczenia) wystaje w górę o połowę swojej wysokości - mieści 4 rzędy kół */
+    .exercise-btn{
+      aspect-ratio:1/1.5 !important;
+      align-self:end;
     }
 
     /* Data pod zegarem (zmiana 11) */
@@ -595,24 +602,25 @@
       50% { box-shadow:0 0 20px rgba(56,200,102,.7), 0 0 30px rgba(56,200,102,.4), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
     }
 
-    /* === Siatka kół (zamiast biegacza) === */
+    /* === Siatka kół === */
     .wheels-grid{
       position:absolute;
       inset:0;
       display:grid;
-      gap:2%;
-      padding:4%;
+      gap:6%;
+      padding:5%;
       box-sizing:border-box;
-      align-content:center;
-      justify-content:center;
       align-items:center;
       justify-items:center;
       z-index:2;
     }
-    /* Pojedyncze koło - SVG przez tło, czarna opona ze srebrną felgą + biaława poświata */
+    /* Pojedyncze koło - dopasowuje się do mniejszego wymiaru komórki gridu */
     .wheel{
-      width:100%;
+      max-width:100%;
+      max-height:100%;
       aspect-ratio:1/1;
+      width:min(100%, 100cqh);
+      height:auto;
       border-radius:50%;
       background:
         radial-gradient(circle at 50% 50%, #c0c0c8 0%, #909098 18%, #404048 28%, #1a1a1f 32%, #050505 100%);
@@ -622,9 +630,15 @@
         inset 0 -3px 6px rgba(0,0,0,.7),
         inset 0 2px 4px rgba(255,255,255,.15);
       position:relative;
-      transition:opacity .3s ease;
     }
-    /* Promienie felgi */
+    /* Każda komórka gridu jako container query do mierzenia wysokości */
+    .wheels-grid > *{
+      container-type:size;
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .wheel-cell{ /* wrapper */ }
+    /* Promienie felgi (wewnątrz opony) */
     .wheel::before{
       content:'';
       position:absolute;
@@ -638,6 +652,7 @@
           #707080, #aaabb5);
       box-shadow:inset 0 0 6px rgba(0,0,0,.6);
     }
+    /* Środkowa nakrętka */
     .wheel::after{
       content:'';
       position:absolute;
@@ -646,17 +661,28 @@
       background:radial-gradient(circle, #d8d8e0 0%, #707078 80%, #303038 100%);
       box-shadow:0 0 3px rgba(0,0,0,.5);
     }
-    /* Animacja zwijania - 3s, czarne okręgi narastają od zewnątrz, koło znika */
+    /* Wariant: emoji opony - aktywuje się klasą .wheels-emoji na .wheels-grid */
+    .wheels-grid.wheels-emoji .wheel{
+      background:transparent;
+      box-shadow:none;
+      display:flex; align-items:center; justify-content:center;
+      font-size:80cqmin;
+      filter:drop-shadow(0 0 8px rgba(220,220,235,.5));
+    }
+    .wheels-grid.wheels-emoji .wheel::before,
+    .wheels-grid.wheels-emoji .wheel::after{
+      display:none;
+    }
+    /* Animacja zwijania */
     .wheel.vanishing{
       animation:wheelVanish 3s ease-in forwards;
     }
     @keyframes wheelVanish{
-      0%   { transform:scale(1); opacity:1;
-             box-shadow:0 0 8px rgba(220,220,235,.35), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
-      30%  { transform:scale(.85); opacity:.9;
-             box-shadow:inset 0 0 0 6px #000, inset 0 0 0 12px rgba(20,20,25,.7), 0 0 4px rgba(220,220,235,.2); }
-      60%  { transform:scale(.5); opacity:.65;
-             box-shadow:inset 0 0 0 12px #000, inset 0 0 0 30px rgba(20,20,25,.85); }
+      0%   { transform:scale(1); opacity:1; }
+      40%  { transform:scale(.7); opacity:.7;
+             box-shadow:inset 0 0 0 8px #000, 0 0 4px rgba(220,220,235,.2); }
+      70%  { transform:scale(.4); opacity:.4;
+             box-shadow:inset 0 0 0 16px #000; }
       100% { transform:scale(0); opacity:0; }
     }
 
@@ -718,6 +744,7 @@
       object-fit:contain;
       z-index:1; pointer-events:none;
     }
+    /* Obrazek "off" widoczny gdy nie ma przerwy. Obrazek "on" gdy trwa przerwa (klasa .on) */
     .break-img-off{ display:block; }
     .break-img-on{ display:none; }
     .break-btn.on .break-img-off{ display:none; }
@@ -734,8 +761,10 @@
     }
     .break-top-zone{ top:0; }
     .break-bot-zone{ bottom:0; }
-    .break-btn.on{
-      background:#ffe84d !important;
+    /* Tło miga między szarym a żółtym - tylko gdy klasa .blink-bg jest aktywna */
+    .break-btn.on{ background:#aaaaaa; }
+    .break-btn.on.blink-bg{
+      background:#ffe84d;
       box-shadow:inset 0 1px 0 rgba(255,255,255,.22),
                  0 0 24px rgba(255,232,77,.55),
                  0 0 0 1px rgba(255,232,77,.55);
@@ -749,7 +778,22 @@
     .pot-img{
       position:absolute; inset:0;
       width:100%; height:100%;
-      object-fit:contain; z-index:1; pointer-events:none;
+      object-fit:contain;
+      z-index:3;        /* nad paskiem ognia, ale pod licznikiem */
+      pointer-events:none;
+    }
+    /* Pasek ognia półprzezroczysty żeby nie zasłaniał obrazka */
+    .pot-fire-bar{
+      position:absolute; bottom:0; left:0; right:0;
+      background:linear-gradient(0deg, rgba(122,0,0,.85), rgba(212,32,32,.7));
+      border-radius:0 0 14px 14px;
+      z-index:2; transition:height 0.8s linear;
+      pointer-events:none;
+    }
+    /* Podczas alarmu (done-alarm/off) tło miga - obrazek nadal widoczny ale półprzezroczyste tło */
+    .pot-btn.done-alarm .pot-img,
+    .pot-btn.done-alarm-off .pot-img{
+      opacity:0.85;
     }
     /* Licznik garnka: okienko 250x15 na 400x400 = 62.5%x3.75%, rozmiar 106x105 = 26.5%x26.25%
        Środek: left=75.75%, top=16.875% */
@@ -757,7 +801,7 @@
       position:absolute;
       left:75.75%; top:16.875%;
       transform:translate(-50%,-50%);
-      z-index:4;
+      z-index:5;
       font-size:clamp(18px,5vw,32px); font-weight:900;
       color:#fff;
       text-shadow:0 0 6px rgba(0,0,0,.9),0 1px 0 rgba(0,0,0,.7);
@@ -769,33 +813,36 @@
       left:50%; top:50%;
       font-size:clamp(40px,11vw,64px);
     }
-    .pot-fire-bar{
-      position:absolute; bottom:0; left:0; right:0;
-      background:linear-gradient(0deg,#7a0000,#d42020);
-      border-radius:0 0 14px 14px;
-      z-index:2; transition:height 0.8s linear;
-      pointer-events:none;
-    }
 
     /* === Koła === */
     .exercise-btn{
       background:#000 !important;
       box-shadow:none !important;
       border-radius:16px;
+      aspect-ratio:1/1.5 !important;
+      align-self:end;
     }
 
-    /* === Data w środku tarczy === */
+    /* === Data w środku tarczy - na czarnym kole pod nią === */
     .date-center{
       position:absolute;
       top:50%; left:50%;
       transform:translate(-50%,-50%);
       z-index:20;
       text-align:center; pointer-events:none;
-      font-size:clamp(13px,3.4vw,19px);
+      font-size:clamp(20px,5.6vw,32px);
       font-weight:800;
       color:var(--dial-number);
-      line-height:1.25;
+      line-height:1.2;
       text-shadow:0 0 8px rgba(220,220,225,.55),0 0 16px rgba(200,200,210,.35);
+      /* Ograniczenie do czarnego koła w SVG (r=70) - dopasować do circle w SVG */
+      width:32%; height:32%;
+      border-radius:50%;
+      overflow:hidden;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:6px;
+      box-sizing:border-box;
     }
 
     .money-btn{ background:linear-gradient(180deg,var(--btn-money-1),var(--btn-money-2)); }
@@ -1228,7 +1275,8 @@
         <g id="dots"></g>
         <g id="hourArrow"></g>
         <g id="minuteDot"></g>
-        <circle cx="200" cy="200" r="5" fill="#f0f0f0" opacity="0.6"/>
+        <!-- Czarne koło pod datą - przykrywa wszystkie kolory tarczy w środku, datę pokazuje na czystym tle -->
+        <circle cx="200" cy="200" r="70" fill="#000" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
       </svg>
 
       <div class="clock-center">
@@ -1315,7 +1363,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.25</div>
+  <div class="version">v:1.26</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1492,52 +1540,71 @@
       clearChildren(gHour); clearChildren(gMin);
 
       const now = new Date();
-      const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+      const h = now.getHours(), m = now.getMinutes();
       const hourDeg = (h % 12) * 30 + m * 0.5;
-      const minDeg  = m * 6 + s * 0.1;
+      // Minuty stoją na pełnej minucie - bez płynnego ruchu sekund
+      const minDeg  = m * 6;
 
-      // === Strzałka godzinowa ===
-      // Zaczyna się blisko cyfry godzinowej (r≈130) i kończy w połowie drogi do środka (r≈60).
-      // Gruba biała z czarną obwódką.
+      // === Strzałka godzinowa - jako polygon (grot strzałki) ===
       const aRad = (hourDeg - 90) * Math.PI / 180;
-      const r1 = 130, r2 = 60; // od r1 (przy cyfrze) do r2 (do środka)
-      const ax1 = cx + Math.cos(aRad) * r1, ay1 = cy + Math.sin(aRad) * r1;
-      const ax2 = cx + Math.cos(aRad) * r2, ay2 = cy + Math.sin(aRad) * r2;
-      // Obwódka
-      const hOut = document.createElementNS('http://www.w3.org/2000/svg','line');
-      hOut.setAttribute('x1',ax1); hOut.setAttribute('y1',ay1);
-      hOut.setAttribute('x2',ax2); hOut.setAttribute('y2',ay2);
-      hOut.setAttribute('stroke','#000'); hOut.setAttribute('stroke-width','13');
-      hOut.setAttribute('stroke-linecap','round');
+      const r1 = 130, r2 = 75;
+      // Punkty trzonu strzałki (prostokąt) + grot na końcu (przy cyfrze, r1)
+      // Grot ma szerokość większą i kończy się w punkcie r1+8
+      const tipR = r1 + 4;        // wierzchołek grotu
+      const headR = r1 - 14;       // gdzie zaczyna się grot (cofnięty od wierzchołka o 18)
+      const shaftR = r2;           // koniec trzonu (bliżej środka)
+      const halfShaft = 5.5;       // pół-szerokość trzonu
+      const halfHead  = 11;        // pół-szerokość grotu (szersza)
+      // Wektor wzdłużny i prostopadły
+      const ux = Math.cos(aRad), uy = Math.sin(aRad);
+      const nx = -uy, ny = ux;
+      function pt(r, side){
+        return [cx + ux*r + nx*side, cy + uy*r + ny*side];
+      }
+      // 7 wierzchołków: trzon-lewa-koniec, trzon-lewa-baza, grot-lewa-baza,
+      //                  wierzchołek, grot-prawa-baza, trzon-prawa-baza, trzon-prawa-koniec
+      const p1 = pt(shaftR, -halfShaft);
+      const p2 = pt(headR,  -halfShaft);
+      const p3 = pt(headR,  -halfHead);
+      const p4 = pt(tipR,    0);
+      const p5 = pt(headR,   halfHead);
+      const p6 = pt(headR,   halfShaft);
+      const p7 = pt(shaftR,  halfShaft);
+      const points = [p1,p2,p3,p4,p5,p6,p7].map(p=>p.map(n=>n.toFixed(2)).join(',')).join(' ');
+
+      // Obwódka (czarna)
+      const hOut = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      hOut.setAttribute('points', points);
+      hOut.setAttribute('fill', '#000');
+      hOut.setAttribute('stroke', '#000');
+      hOut.setAttribute('stroke-width', '4');
+      hOut.setAttribute('stroke-linejoin', 'round');
       gHour.appendChild(hOut);
       // Wypełnienie białe
-      const hIn = document.createElementNS('http://www.w3.org/2000/svg','line');
-      hIn.setAttribute('x1',ax1); hIn.setAttribute('y1',ay1);
-      hIn.setAttribute('x2',ax2); hIn.setAttribute('y2',ay2);
-      hIn.setAttribute('stroke','#ffffff'); hIn.setAttribute('stroke-width','8');
-      hIn.setAttribute('stroke-linecap','round');
+      const hIn = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      hIn.setAttribute('points', points);
+      hIn.setAttribute('fill', '#ffffff');
       gHour.appendChild(hIn);
 
       // === Kropka minut na obwodzie + liczba minut na zewnątrz ===
+      // Kropka pokazuje aktualną minutę i nie porusza się w obrębie minuty.
       const mRad = (minDeg - 90) * Math.PI / 180;
-      const dotR = radius; // na obwodzie (180)
+      const dotR = radius;
       const dotX = cx + Math.cos(mRad) * dotR, dotY = cy + Math.sin(mRad) * dotR;
-      // Biała kropka
       const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
       dot.setAttribute('cx', dotX.toFixed(2)); dot.setAttribute('cy', dotY.toFixed(2));
-      dot.setAttribute('r','6'); dot.setAttribute('fill','#ffffff');
+      dot.setAttribute('r','7'); dot.setAttribute('fill','#ffffff');
       dot.setAttribute('filter','url(#glow)');
       gMin.appendChild(dot);
-      // Etykieta minut po zewnętrznej stronie
-      const lblR = radius + 18;
+      // Etykieta minut na zewnątrz
+      const lblR = radius + 22;
       const lblX = cx + Math.cos(mRad) * lblR, lblY = cy + Math.sin(mRad) * lblR;
       const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
       lbl.setAttribute('x', lblX.toFixed(2)); lbl.setAttribute('y', lblY.toFixed(2));
       lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('dominant-baseline','central');
-      lbl.setAttribute('fill','#fff'); lbl.setAttribute('font-size','16');
+      lbl.setAttribute('fill','#fff'); lbl.setAttribute('font-size','22');
       lbl.setAttribute('font-weight','800'); lbl.setAttribute('font-family','inherit');
-      lbl.setAttribute('opacity','0.9');
-      lbl.style.textShadow = '0 0 4px rgba(255,255,255,.6)';
+      lbl.setAttribute('opacity','0.95');
       lbl.textContent = String(m);
       gMin.appendChild(lbl);
 
@@ -1590,6 +1657,16 @@
     function getEffectiveExerciseElapsed(){
       if(startWorkMinutes===null||lastExerciseMinutes===null) return 0;
       return Math.max(0, diffMinutes(lastExerciseMinutes,effectiveNow()) - getBreakOverlapSince(lastExerciseMinutes));
+    }
+    // Płynna wersja w minutach z ułamkiem (uwzględnia sekundy z aktualnego zegara)
+    function getEffectiveExerciseElapsedFractional(){
+      if(startWorkMinutes===null||lastExerciseMinutes===null) return 0;
+      const baseMin = getEffectiveExerciseElapsed();
+      // Jeśli mamy zamknięty endWorkMinutes - nie ma już ruchu sekund
+      if(endWorkMinutes!==null) return baseMin;
+      // Inaczej - dodaj ułamek wynikający z aktualnych sekund
+      const secs = new Date().getSeconds();
+      return baseMin + (secs/60);
     }
 
     // === Bug 15: efektywny początek czerwonego sektora ===
@@ -1732,19 +1809,22 @@
         const totalBreak=getTotalBreakMinutes(true);
         workStartMini.textContent=formatHHMM(startWorkMinutes);
         workEndMini.textContent=endWorkMinutes!==null?formatHHMM(endWorkMinutes):'';
-        // Suma przerw - górna 1/3 (jeśli >0 lub jeśli była korekta)
-        breakTopZone.textContent = totalBreak !== 0 ? formatCompactSigned(totalBreak) : '';
-        // Bieżąca przerwa - dolna 1/3 (tylko gdy aktywna)
-        breakBotZone.textContent = breakActive ? formatCompact(getActiveBreakMinutes()) : '';
+        // Suma przerw - górna 1/3 (jeśli >0 lub jeśli była korekta) - format :MM
+        breakTopZone.textContent = totalBreak !== 0 ? ':' + pad(Math.abs(totalBreak)) : '';
+        // Bieżąca przerwa - dolna 1/3 (tylko gdy aktywna) - format :MM
+        breakBotZone.textContent = breakActive ? ':' + pad(getActiveBreakMinutes()) : '';
         workBtn.classList.toggle('overtime', net>480);
         renderWorkRoller(Math.max(0,net));
         renderWheels(ex);
       }
 
       const breakBtn=document.getElementById('breakBtn');
-      breakBtn.classList.remove('on');
-      if(endWorkMinutes===null && breakActive && blinkState){
-        breakBtn.classList.add('on');
+      // Punkt 10: obrazek "on/off" sterowany TYLKO przez breakActive (nie przez blinkState).
+      // Klasa .on pokazuje obrazek przerwa.png; .blink-bg miga tłem żółto-szarym.
+      breakBtn.classList.remove('on','blink-bg');
+      if(endWorkMinutes===null && breakActive){
+        breakBtn.classList.add('on');                  // obrazek przerwa.png stale
+        if(blinkState) breakBtn.classList.add('blink-bg');  // tło miga
       }
 
       renderPotButton();
@@ -1769,10 +1849,11 @@
       const wheelsLeft = Math.max(0, 12 - Math.floor(elapsedMinutes / 5));
 
       if(wheelsLeft <= 0){
-        // Tryb "overage" - czerwony licznik minut nadwyżki
+        // Tryb "overage" - czerwony licznik minut nadwyżki, z ułamkiem dla płynnej animacji
         exBtn.classList.add('overage');
-        const over = Math.max(1, Math.floor(elapsedMinutes - 60));
-        renderOverageRoller(over);
+        // Punkt 17: sekundy z zegara dają płynne przewijanie rolki
+        const overFrac = Math.max(0, getEffectiveExerciseElapsedFractional() - 60);
+        renderOverageRoller(overFrac);
         return;
       }
       exBtn.classList.remove('overage');
@@ -1794,17 +1875,23 @@
       // Jeśli się nie zmieniła - nic nie rób
       if(wheelsLeft === _wheelsState.count) return;
 
-      // Liczba zmalała - animuj znikanie pierwszych "diff" kół
+      // Liczba zmalała - animuj znikanie pierwszych "diff" kół (po DOM order = czytamy z grida w porządku)
       const diff = _wheelsState.count - wheelsLeft;
       _wheelsState.count = wheelsLeft;
-      // Pierwsze `diff` kół (od góry-lewej) dostają animację vanishing
-      const wheels = grid.querySelectorAll('.wheel:not(.vanishing)');
-      for(let i = 0; i < diff && i < wheels.length; i++){
-        wheels[i].classList.add('vanishing');
+
+      // Pierwsze `diff` aktywnych komórek z .wheel:not(.vanishing). DOM order zgadza się z grid order
+      // bo grid renderuje 1->prawa, potem nowy rząd. Czyli pierwsze [0..diff) to górny-lewy, dalej.
+      const cells = grid.querySelectorAll('.wheel-cell');
+      const toVanish = [];
+      for(let i = 0; i < cells.length; i++){
+        const w = cells[i].querySelector('.wheel:not(.vanishing)');
+        if(w){ toVanish.push(w); if(toVanish.length >= diff) break; }
       }
-      // Po zakończeniu animacji (3s) - rebuild w nowym layoucie
+      toVanish.forEach(w => w.classList.add('vanishing'));
+
+      // Po zakończeniu animacji (3s) - przeskaluj siatkę na docelową ilość.
+      // Ważne: rebuild generuje nowy layout, ale to OK bo widzowi już się "spaliły" konkretne koła.
       setTimeout(()=>{
-        // Sprawdź czy stan nie zmienił się w międzyczasie
         if(_wheelsState.count === wheelsLeft){
           buildWheelsGrid(wheelsLeft);
         }
@@ -1813,29 +1900,40 @@
 
     function buildWheelsGrid(count){
       const grid = document.getElementById('wheelsGrid');
-      // Przycisk jest kwadratowy. Siatki tak by koła były możliwie duże.
+      // Moduł jest portrait (1:1.5) - więcej rzędów niż kolumn
       const layouts = {
         12: { cols:3, rows:4 },
         11: { cols:3, rows:4 },
-        10: { cols:3, rows:4 },
-        9:  { cols:3, rows:3 },
-        8:  { cols:3, rows:3 },
-        7:  { cols:3, rows:3 },
-        6:  { cols:3, rows:2 },
-        5:  { cols:3, rows:2 },
+        10: { cols:2, rows:5 },
+        9:  { cols:2, rows:5 },   /* 9 w 2x5 = 1 puste, ale lepsza skala */
+        8:  { cols:2, rows:4 },
+        7:  { cols:2, rows:4 },
+        6:  { cols:2, rows:3 },
+        5:  { cols:2, rows:3 },
         4:  { cols:2, rows:2 },
         3:  { cols:1, rows:3 },
         2:  { cols:1, rows:2 },
         1:  { cols:1, rows:1 }
       };
+      // Specjalne layouty by koła nie były gigantyczne przy małej liczbie
+      // Limity: max kolumn = 2, max rzędy zależnie od ilości
       const lay = layouts[count] || { cols:3, rows:4 };
       grid.style.gridTemplateColumns = `repeat(${lay.cols}, 1fr)`;
       grid.style.gridTemplateRows = `repeat(${lay.rows}, 1fr)`;
       clearChildren(grid);
+      // Tryb wybrany w localStorage: 'css' (domyślnie) lub 'emoji'
+      const mode = (localStorage.getItem('wheelsMode') || 'css');
+      grid.classList.toggle('wheels-emoji', mode === 'emoji');
       for(let i=0; i<count; i++){
+        const cell = document.createElement('div');
+        cell.className = 'wheel-cell';
         const w = document.createElement('div');
         w.className = 'wheel';
-        grid.appendChild(w);
+        if(mode === 'emoji'){
+          w.textContent = '🛞';
+        }
+        cell.appendChild(w);
+        grid.appendChild(cell);
       }
     }
 
@@ -1876,10 +1974,12 @@
       }
 
       const clamped = Math.min(MAX_MIN, Math.max(0, minutes));
-      // Frac: aktualizacja co 5s - minuty pełne, bez frakcji żeby nie skakało
+      const intM = Math.floor(clamped);
+      const frac = clamped - intM;
       const baseOffset = (h / 2) - (digitH / 2);
-      const offset = baseOffset - clamped * digitH;
-      inner.style.transition = 'transform 0.6s ease';
+      const offset = baseOffset - (intM + frac) * digitH;
+      // Krótka transition żeby kropki sekund nie szarpały
+      inner.style.transition = 'transform 0.95s linear';
       inner.style.transform = `translateY(${offset}px)`;
     }
 
@@ -3049,20 +3149,51 @@
       ()=> openTimeEditor('start')
     );
 
-    // === EXERCISE - bez long-press ===
-    document.getElementById('exerciseBtn').addEventListener('click', ()=>{
-      if(startWorkMinutes===null || endWorkMinutes!==null) return;
-      const now=nowMinutes();
-      lastExerciseMinutes=now;
-      exerciseMarkers.push(now);
-      // Reset stanu kół - następny render zbuduje 12 kół od nowa
-      _wheelsState = { count: 12, initialized: false };
-      const b=document.getElementById('exerciseBtn');
-      b.classList.remove('alert','blink','overage');
-      b.classList.add('flash');
-      setTimeout(()=>{ b.classList.remove('flash'); renderAll(); }, 2300);
-      saveState(); renderAll();
-    });
+    // === EXERCISE - klik = reset, long-press 3s = przełącz tryb kół (CSS ↔ emoji) ===
+    (function setupExerciseLongPress(){
+      const btn = document.getElementById('exerciseBtn');
+      let pressTimer = null;
+      let longFired = false;
+      function start(e){
+        longFired = false;
+        btn.classList.add('lp-active');
+        pressTimer = setTimeout(()=>{
+          longFired = true;
+          btn.classList.remove('lp-active');
+          // Przełącz tryb i pokaż toast
+          const cur = localStorage.getItem('wheelsMode') || 'css';
+          const next = cur === 'css' ? 'emoji' : 'css';
+          localStorage.setItem('wheelsMode', next);
+          showToast('Tryb kół: ' + (next === 'emoji' ? 'emoji 🛞' : 'CSS (felgi)'), 'ok');
+          _wheelsState = { count: _wheelsState.count, initialized: false };
+          renderAll();
+          if(navigator.vibrate){ try{ navigator.vibrate([60,40,60]); }catch(e){} }
+        }, 3000);
+      }
+      function endP(){
+        clearTimeout(pressTimer);
+        btn.classList.remove('lp-active');
+        if(longFired) return;
+        // Krótki klik = ćwiczenia
+        if(startWorkMinutes===null || endWorkMinutes!==null) return;
+        const now=nowMinutes();
+        lastExerciseMinutes=now;
+        exerciseMarkers.push(now);
+        _wheelsState = { count: 12, initialized: false };
+        btn.classList.remove('alert','blink','overage');
+        btn.classList.add('flash');
+        setTimeout(()=>{ btn.classList.remove('flash'); renderAll(); }, 2300);
+        saveState(); renderAll();
+      }
+      function cancel(){
+        clearTimeout(pressTimer);
+        btn.classList.remove('lp-active');
+      }
+      btn.addEventListener('pointerdown', start);
+      btn.addEventListener('pointerup', endP);
+      btn.addEventListener('pointerleave', cancel);
+      btn.addEventListener('pointercancel', cancel);
+    })();
 
     // === BREAK ===
     setupLongPress(
