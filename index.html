@@ -145,7 +145,7 @@
       display:flex; align-items:center; justify-content:center;
       pointer-events:none;
     }
-    .clock-face{ width:80%; height:80%; border-radius:50%; position:relative; }
+    .clock-face{ width:73%; height:73%; border-radius:50%; position:relative; }
     .number{
       position:absolute; left:50%; top:50%;
       transform:translate(-50%,-50%);
@@ -721,35 +721,17 @@
       object-fit:contain;
       pointer-events:none;
       filter:drop-shadow(0 0 10px rgba(220,220,235,.5));
-      /* Maska conic - widoczne koło to czarna część maski.
-         --vanish-angle: 0deg = pełne koło widoczne, 360deg = całe zniknęło.
-         Soft edge ma 30deg szerokości i wyprzedza wskazówkę o ~15deg. */
-      --vanish-angle: 0deg;
-      -webkit-mask-image:
-        conic-gradient(from 0deg at 50% 50%,
-          transparent 0deg,
-          transparent var(--vanish-angle),
-          rgba(0,0,0,0.15) calc(var(--vanish-angle) + 8deg),
-          rgba(0,0,0,0.5)  calc(var(--vanish-angle) + 18deg),
-          rgba(0,0,0,0.85) calc(var(--vanish-angle) + 28deg),
-          black            calc(var(--vanish-angle) + 38deg),
-          black            360deg);
-      mask-image:
-        conic-gradient(from 0deg at 50% 50%,
-          transparent 0deg,
-          transparent var(--vanish-angle),
-          rgba(0,0,0,0.15) calc(var(--vanish-angle) + 8deg),
-          rgba(0,0,0,0.5)  calc(var(--vanish-angle) + 18deg),
-          rgba(0,0,0,0.85) calc(var(--vanish-angle) + 28deg),
-          black            calc(var(--vanish-angle) + 38deg),
-          black            360deg);
-      transition: --vanish-angle 0.95s linear;
+      /* Maska sterowana z JS - przez clip-path lub przez nakładkę SVG.
+         Tutaj samo CSS bez maski, JS rysuje overlay. */
     }
-    /* Tryb przywracania (animacja odwrotna) - ang idzie od aktualnego do 0 w 2s */
-    .wheel-image.restoring{
-      transition: --vanish-angle 2s ease-out;
+    /* Czarna nakładka maskująca - SVG sektor który rośnie od 12:00 */
+    .wheel-mask-overlay{
+      position:absolute;
+      inset:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      z-index:2;
     }
-
     /* Czerwony moduł nadwyżki - jak dotychczas */
     .overage-display{
       position:absolute;
@@ -767,7 +749,8 @@
     .exercise-btn.overage .overage-display{
       display:block;
     }
-    .exercise-btn.overage .wheel-image{
+    .exercise-btn.overage .wheel-image,
+    .exercise-btn.overage .wheel-mask-overlay{
       display:none;
     }
     /* Stan "fading-overage": czerwony moduł gaśnie do czerni przed pojawieniem się koła z animacją odwrotną */
@@ -785,13 +768,6 @@
                   inset 0 -12px 16px rgba(0,0,0,.2),
                   0 0 22px rgba(255,170,63,.45),
                   0 0 0 1px rgba(255,170,63,.45);
-    }
-
-    /* CSS Houdini - rejestracja --vanish-angle jako kąta dla animacji */
-    @property --vanish-angle {
-      syntax: '<angle>';
-      inherits: false;
-      initial-value: 0deg;
     }
 
     /* === Data w środku tarczy - na czarnym kole pod nią === */
@@ -895,18 +871,32 @@
     .overlay.show{ display:flex; }
 
     .editor{
-      width:min(96vw, 520px); aspect-ratio:1/1;
+      width:min(96vw, 520px);
+      max-height:90vh;
       background:#060606; border:1px solid #232323;
       border-radius:18px;
       box-shadow:0 0 30px rgba(0,0,0,.65);
       display:flex; flex-direction:column; justify-content:center;
-      padding:18px 14px 16px; position:relative;
+      padding:18px 14px 88px; position:relative;
+      overflow-y:auto;
     }
     .editor-center{
-      flex:1;
       display:grid; grid-template-columns:1fr auto 1fr;
       align-items:center; justify-items:center;
-      gap:10px; padding:12px 8px 30px;
+      gap:10px; padding:12px 8px 12px;
+    }
+    .target-section{
+      text-align:center;
+      margin-top:8px;
+      padding-top:10px;
+      border-top:1px solid #2a2a2a;
+    }
+    .target-section button{
+      margin-top:6px;
+      padding:0 18px;
+      font-size:15px;
+      height:42px;
+      width:auto;
     }
     .time-col{ display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; }
     .arrow-btn{
@@ -1229,7 +1219,7 @@
           <div class="end-confirm-hint">stuknij aby zakończyć</div>
         </div>
       </div>
-      <svg class="clock-svg" viewBox="0 0 400 400" aria-hidden="true">
+      <svg class="clock-svg" viewBox="-30 -30 460 460" aria-hidden="true">
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="blur"/>
@@ -1267,7 +1257,7 @@
       </div>
 
       <!-- Punkty 4+5: druga warstwa SVG nad cyframi godzin - dla strzałki godzinowej i kropki minut -->
-      <svg class="clock-svg clock-svg-overlay" viewBox="0 0 400 400" aria-hidden="true">
+      <svg class="clock-svg clock-svg-overlay" viewBox="-30 -30 460 460" aria-hidden="true">
         <g id="hourArrow"></g>
         <g id="minuteDot"></g>
       </svg>
@@ -1295,6 +1285,27 @@
       <button class="btn exercise-btn" id="exerciseBtn" type="button">
         <img src="Photos/kolo.png" alt="Koło" class="wheel-image" id="wheelImage"
              onerror="this.style.display='none'" />
+        <svg class="wheel-mask-overlay" id="wheelMaskOverlay" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <radialGradient id="maskFade" cx="100" cy="100" r="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#000" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#000" stop-opacity="1"/>
+            </radialGradient>
+            <!-- Maska kątowa: kąt który zanikł (czarny sektor) z miękkim brzegiem -->
+            <linearGradient id="edgeFade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#000" stop-opacity="1"/>
+              <stop offset="50%" stop-color="#000" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Czarny sektor (vanished area) - rysowany dynamicznie z JS -->
+          <path id="wheelVanishSector" d="" fill="#000" />
+          <!-- Miękka krawędź (gradient blur) - rysowana dynamicznie z JS -->
+          <path id="wheelVanishEdge" d="" fill="#000" opacity="0.5" filter="url(#blurEdge)" />
+          <filter id="blurEdge">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+        </svg>
         <div class="overage-display" id="overageDisplay">
           <div class="work-roller" style="position:absolute;top:50%;left:6%;right:6%;transform:translateY(-50%);height:80%;background:rgba(0,0,0,.55);">
             <div class="work-roller-inner" id="overageRollerInner"></div>
@@ -1339,7 +1350,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.27</div>
+  <div class="version">v:1.28</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1395,7 +1406,7 @@
     let keypadCounterDigits = [];
     let keypadCursorFromRight = 0;
 
-    const cx=200, cy=200, radius=160;
+    const cx=200, cy=200, radius=180;
     let blinkState = false;
 
     // ===== localStorage =====
@@ -1527,7 +1538,7 @@
 
       // === Strzałka godzinowa - jako polygon (grot strzałki) ===
       const aRad = (hourDeg - 90) * Math.PI / 180;
-      const r1 = 115, r2 = 75;
+      const r1 = 130, r2 = 75;
       // Punkty trzonu strzałki (prostokąt) + grot na końcu (przy cyfrze, r1)
       // Grot ma szerokość większą i kończy się w punkcie r1+8
       const tipR = r1 + 4;        // wierzchołek grotu
@@ -1760,7 +1771,7 @@
       if(end===null) return;
       const ang = angleFromMinutes(end);
       const fRad = ang * Math.PI / 180;
-      const r1 = 115, r2 = 75;
+      const r1 = 130, r2 = 75;
       const fx1 = cx + Math.cos(fRad)*r1, fy1 = cy + Math.sin(fRad)*r1;
       const fx2 = cx + Math.cos(fRad)*r2, fy2 = cy + Math.sin(fRad)*r2;
       g.appendChild(svgLine(fx1,fy1,fx2,fy2,'var(--forecast)',5,'8 6'));
@@ -1819,98 +1830,138 @@
     }
 
     // === Render modułu ćwiczeń ===
-    // Logika: koło ma maskę conic-gradient. --vanish-angle 0..360deg.
-    // 0deg = pełne koło widoczne, 360deg = całe zniknęło.
-    // 60 minut → 360 stopni, czyli 6deg/minuta.
+    // Logika: koło ma SVG-overlay z czarnym sektorem który rośnie zgodnie z minutami.
+    // Sektor zaczyna się od 12:00 (kąt -90 w SVG units), idzie zgodnie z ruchem wskazówek.
+    // 60 minut → 360°, czyli 6°/min.
     // Stan _wheelsState:
     //   .restoring - czy aktualnie odtwarzamy koło wstecz (po kliknięciu)
-    //   .restoreFromAngle - od jakiego kąta startujemy odtwarzanie (z aktualnego stanu)
-    //   .restoreStartTime - kiedy zaczęliśmy odtwarzanie (do animacji 2s)
+    //   .restoreFromAngle - od jakiego kąta startujemy odtwarzanie
+    //   .restoreStartTime - kiedy zaczęliśmy odtwarzanie (animacja 2s)
     let _wheelsState = {
       restoring: false,
       restoreFromAngle: 0,
       restoreStartTime: 0
     };
+
+    // Rysuje SVG path sektora od 12:00 do `vanishedDeg` (zgodnie ze wskazówkami).
+    // Sektor pełny = czarny, plus krawędź soft (filter blur na końcu).
+    function paintWheelMask(vanishedDeg){
+      const sector = document.getElementById('wheelVanishSector');
+      const edge = document.getElementById('wheelVanishEdge');
+      if(!sector || !edge) return;
+
+      if(vanishedDeg <= 0){
+        sector.setAttribute('d', '');
+        edge.setAttribute('d', '');
+        return;
+      }
+      if(vanishedDeg >= 360){
+        // Pełny krąg
+        sector.setAttribute('d', 'M 100 0 A 100 100 0 1 1 99.99 0 Z M 100 100 Z');
+        edge.setAttribute('d', '');
+        return;
+      }
+
+      const cx=100, cy=100, r=110; // r=110 daje minimalny zapas poza viewBox 0-200, żeby nie odsłaniało koła
+      // SVG kąty: 0deg = w prawo, ale w zegarze 0deg = w górę. Korekta -90.
+      // Sektor "zniknięty" idzie od 12:00 (top) zgodnie ze wskazówkami do `vanishedDeg`.
+      const startAng = -90;                    // 12:00
+      const endAng   = -90 + vanishedDeg;       // np. dla 90deg → 0deg = 3:00
+
+      const startRad = startAng * Math.PI / 180;
+      const endRad   = endAng   * Math.PI / 180;
+      const startX = cx + r * Math.cos(startRad);
+      const startY = cy + r * Math.sin(startRad);
+      const endX   = cx + r * Math.cos(endRad);
+      const endY   = cy + r * Math.sin(endRad);
+      const largeArc = vanishedDeg > 180 ? 1 : 0;
+
+      const d = `M ${cx} ${cy} L ${startX.toFixed(2)} ${startY.toFixed(2)} ` +
+                `A ${r} ${r} 0 ${largeArc} 1 ${endX.toFixed(2)} ${endY.toFixed(2)} Z`;
+      sector.setAttribute('d', d);
+
+      // Soft edge: cienki sektor o szerokości 25deg na końcu z opacity gradient
+      // Aby uzyskać rozmycie - rysuję drugi krótki sektor i blur go w SVG
+      const edgeWidth = 25;
+      const edgeStart = Math.max(0, vanishedDeg - edgeWidth);
+      const e1Ang = -90 + edgeStart;
+      const e2Ang = endAng;
+      const e1Rad = e1Ang * Math.PI / 180;
+      const e2Rad = e2Ang * Math.PI / 180;
+      const e1X = cx + r * Math.cos(e1Rad), e1Y = cy + r * Math.sin(e1Rad);
+      const e2X = cx + r * Math.cos(e2Rad), e2Y = cy + r * Math.sin(e2Rad);
+      const eLargeArc = (edgeStart - vanishedDeg) > 180 ? 1 : 0;
+      const dEdge = `M ${cx} ${cy} L ${e1X.toFixed(2)} ${e1Y.toFixed(2)} ` +
+                    `A ${r} ${r} 0 ${eLargeArc} 1 ${e2X.toFixed(2)} ${e2Y.toFixed(2)} Z`;
+      edge.setAttribute('d', dEdge);
+    }
+
     function renderWheels(elapsedMinutes){
       const exBtn = document.getElementById('exerciseBtn');
-      const img = document.getElementById('wheelImage');
-      if(!img) return;
 
       if(!startWorkMinutes){
         elapsedMinutes = 0;
       }
-      // Limit 500 minut - powyżej zatrzymujemy
       if(elapsedMinutes > 500) elapsedMinutes = 500;
 
       // === Tryb odtwarzania (po kliknięciu) ===
       if(_wheelsState.restoring){
         const dt = (Date.now() - _wheelsState.restoreStartTime) / 1000;
-        const RESTORE_DUR = 2.0; // 2 sekundy
+        const RESTORE_DUR = 2.0;
         if(dt >= RESTORE_DUR){
-          // Odtwarzanie zakończone - zaczyna się nowy cykl
           _wheelsState.restoring = false;
-          img.style.setProperty('--vanish-angle', '0deg');
-          img.classList.remove('restoring');
+          paintWheelMask(0);
           exBtn.classList.remove('overage','fading-overage');
-          // Zresetuj lastExerciseMinutes już zostało zrobione przy kliknięciu
           return;
         }
-        // Liniowa interpolacja z restoreFromAngle do 0
         const progress = dt / RESTORE_DUR;
         const ang = _wheelsState.restoreFromAngle * (1 - progress);
-        img.style.setProperty('--vanish-angle', ang.toFixed(2) + 'deg');
+        paintWheelMask(ang);
         return;
       }
 
       // === Tryb normalny: maska zanika zgodnie z upływem minut ===
-      // Frakcyjne minuty dla płynnego ruchu
       const elapsedFrac = (startWorkMinutes && lastExerciseMinutes!==null && endWorkMinutes===null)
         ? getEffectiveExerciseElapsedFractional()
         : elapsedMinutes;
 
       if(elapsedFrac >= 60){
-        // Tryb "overage" - czerwony licznik minut nadwyżki
+        // Tryb "overage" - czerwony licznik nadwyżki
         exBtn.classList.add('overage');
-        img.style.setProperty('--vanish-angle', '360deg');
+        paintWheelMask(360);
         const overFrac = Math.max(0, elapsedFrac - 60);
         renderOverageRoller(overFrac);
         return;
       }
       exBtn.classList.remove('overage','fading-overage');
 
-      // Kąt zaniku: 6deg na minutę (60min = 360deg)
       const ang = Math.min(360, elapsedFrac * 6);
-      img.style.setProperty('--vanish-angle', ang.toFixed(2) + 'deg');
+      paintWheelMask(ang);
     }
 
-    // Rozpoczyna animację przywracania koła (po kliknięciu w przycisk ćwiczeń).
-    // Jeśli był tryb overage - najpierw fade czerwonego modułu do czerni (0.6s),
-    // potem odtwarzanie koła (2s) wstecz po torze zanikania.
+    // Animacja przywracania koła po kliknięciu
     function startWheelRestore(){
       const exBtn = document.getElementById('exerciseBtn');
-      const img = document.getElementById('wheelImage');
-      if(!img) return;
 
-      // Jeśli był tryb overage - najpierw fade czerwonego do czerni
       if(exBtn.classList.contains('overage')){
+        // Najpierw fade czerwonego do czerni (0.6s)
         exBtn.classList.add('fading-overage');
-        // Po 0.6s usuwamy klasę overage i startujemy animację odtwarzania
         setTimeout(()=>{
           exBtn.classList.remove('overage','fading-overage');
-          // Z trybu overage zaczynamy od 360deg (pełen zanik)
           _wheelsState.restoring = true;
           _wheelsState.restoreFromAngle = 360;
           _wheelsState.restoreStartTime = Date.now();
-          img.classList.add('restoring');
           renderWheels(0);
         }, 600);
       } else {
-        // Z bieżącego stanu zanikania - zacznij animację wstecz od aktualnego kąta
-        const currentAngle = parseFloat(getComputedStyle(img).getPropertyValue('--vanish-angle')) || 0;
+        // Z bieżącego stanu zanikania - zacznij animację wstecz
+        const elapsedFrac = (startWorkMinutes && lastExerciseMinutes!==null && endWorkMinutes===null)
+          ? getEffectiveExerciseElapsedFractional()
+          : 0;
+        const currentAngle = Math.min(360, elapsedFrac * 6);
         _wheelsState.restoring = true;
         _wheelsState.restoreFromAngle = currentAngle;
         _wheelsState.restoreStartTime = Date.now();
-        img.classList.add('restoring');
         renderWheels(0);
       }
     }
@@ -2332,9 +2383,9 @@
       }
       // Punkt 7: w trybie 'start' dodatkowo widać i można edytować cel pracy
       const targetSection = editMode==='start' ? `
-        <div style="text-align:center; margin-top:14px; padding-top:14px; border-top:1px solid #2a2a2a;">
+        <div class="target-section">
           <div class="keypad-label" style="opacity:.7;">Cel pracy: <strong style="color:#7adf8a;">${pad(Math.floor(workTargetMinutes/60))}:${pad(workTargetMinutes%60)}</strong></div>
-          <button class="ok-btn" data-act="editTarget" style="margin-top:8px;width:auto;padding:0 18px;font-size:15px;height:42px;background:linear-gradient(180deg,#2a4a2a,#1a3a1a);">Zmień cel</button>
+          <button class="ok-btn" data-act="editTarget" style="background:linear-gradient(180deg,#2a4a2a,#1a3a1a);">Zmień cel</button>
         </div>
       ` : '';
       showOverlay(`
