@@ -164,12 +164,12 @@
     .date-display{
       width:100%;
       text-align:center;
-      font-size:clamp(27px, 7.2vw, 40px);
+      font-size:clamp(24px, 6.4vw, 36px);
       font-weight:800;
       color:var(--dial-number);
       letter-spacing:.5px;
-      padding:6px 0;
-      line-height:1.05;
+      padding:0;
+      line-height:1;
       text-shadow:
         0 0 8px rgba(220,220,225,.55),
         0 0 16px rgba(200,200,210,.35),
@@ -212,7 +212,7 @@
     }
     .btn{
       position:relative; border:none; border-radius:16px;
-      aspect-ratio:1/1; min-height:84px;
+      aspect-ratio:1/1.33; min-height:108px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.08),
                   inset 0 -12px 16px rgba(0,0,0,.34),
                   0 0 0 1px rgba(0,0,0,.55);
@@ -583,7 +583,17 @@
                   0 0 0 1px rgba(255,154,31,.55);
     }
 
-    .exercise-btn{ background:linear-gradient(180deg,var(--btn-ex-off-1),var(--btn-ex-off-2)); }
+    .exercise-btn{
+      background:#000;
+      box-shadow:none;
+    }
+    .exercise-btn.flash .wheel{
+      animation:wheelFlash .8s ease;
+    }
+    @keyframes wheelFlash{
+      0%, 100% { box-shadow:0 0 8px rgba(220,220,235,.35), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
+      50% { box-shadow:0 0 20px rgba(56,200,102,.7), 0 0 30px rgba(56,200,102,.4), inset 0 -3px 6px rgba(0,0,0,.7), inset 0 2px 4px rgba(255,255,255,.15); }
+    }
 
     /* === Siatka kół (zamiast biegacza) === */
     .wheels-grid{
@@ -697,34 +707,51 @@
                   0 0 0 1px rgba(255,90,71,.52);
     }
 
-    .break-btn{ background:linear-gradient(180deg,var(--btn-break-off-1),var(--btn-break-off-2)); }
-    /* Obrazek "przerwa" - widoczny gdy spoczynek; znika gdy przerwa aktywna lub po jej zakończeniu (jest dane) */
+    /* === Przerwa - jasnoszare tło, obrazek (auto+człowiek) wypełnia środek === */
+    .break-btn{
+      background:#aaaaaa;
+      transition:background .25s ease;
+    }
     .break-img{
       position:absolute;
       inset:0;
       width:100%; height:100%;
-      object-fit:cover;
+      object-fit:contain;
       z-index:1;
       pointer-events:none;
-      display:none;
     }
-    .break-btn.has-img{
-      background:#000;
-    }
-    .break-btn.has-img .break-img{
-      display:block;
-    }
-    /* Gdy przerwa jest aktywna lub mamy do pokazania liczbę - obrazek znika i widać klasyczny przycisk */
-    .break-btn.on .break-img,
-    .break-btn.has-data .break-img{
-      display:none;
-    }
-    .break-btn.has-data{
+    .break-btn.no-img{
       background:linear-gradient(180deg,var(--btn-break-off-1),var(--btn-break-off-2));
     }
-    /* Emoji klepsydry również ukrywamy gdy mamy obrazek (i nie jest aktywne ani z danymi) */
-    .break-btn.has-img:not(.on):not(.has-data) #breakEmoji{
-      display:none;
+    /* Strefy tekstowe - górna 1/3 dla sumy, dolna 1/3 dla bieżącej przerwy */
+    .break-top-zone, .break-bot-zone{
+      position:absolute;
+      left:0; right:0;
+      height:33%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(28px, 7.5vw, 44px);
+      font-weight:900;
+      color:#1a1a1a;
+      letter-spacing:-1px;
+      z-index:3;
+      pointer-events:none;
+      text-shadow:
+        0 0 6px rgba(255,255,255,.85),
+        0 1px 0 rgba(255,255,255,.6);
+      font-variant-numeric:tabular-nums;
+    }
+    .break-top-zone{ top:0; }
+    .break-bot-zone{ bottom:0; }
+    /* Miganie podczas aktywnej przerwy: jasnoszare ↔ żółty - obrazek pozostaje */
+    .break-btn.on{
+      background:#ffe84d !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -12px 16px rgba(0,0,0,.1),
+        0 0 24px rgba(255,232,77,.55),
+        0 0 0 1px rgba(255,232,77,.55);
     }
     .break-btn.on{
       background:linear-gradient(180deg,var(--btn-break-on-1),var(--btn-break-on-2));
@@ -1226,12 +1253,9 @@
         <div class="lp-ring"></div>
         <img src="Photos/przerwa.png" alt="Przerwa" class="break-img" id="breakImg"
              onload="this.parentElement.classList.add('has-img')"
-             onerror="this.remove()" />
-        <div class="mini-corner" id="breakSumMini"></div>
-        <div class="btn-inner">
-          <div class="center-big" id="breakCenter"></div>
-        </div>
-        <div class="emoji" id="breakEmoji">⌛</div>
+             onerror="this.style.display='none';this.parentElement.classList.add('no-img')" />
+        <div class="break-top-zone" id="breakTopZone"></div>
+        <div class="break-bot-zone" id="breakBotZone"></div>
       </button>
 
       <button class="btn pot-btn" id="potBtn" type="button">
@@ -1259,7 +1283,7 @@
   <div class="overlay" id="overlay"></div>
 
   <button class="install-btn" id="installBtn" type="button">📥 Zainstaluj</button>
-  <div class="version">v:1.22</div>
+  <div class="version">v:1.23</div>
 
   <script>
     const LS_KEY = 'tarcza_state_v1';
@@ -1642,14 +1666,14 @@
       const workStartMini=document.getElementById('workStartMini');
       const workEndMini=document.getElementById('workEndMini');
       const exBtn=document.getElementById('exerciseBtn');
-      const breakSumMini=document.getElementById('breakSumMini');
-      const breakCenter=document.getElementById('breakCenter');
+      const breakTopZone=document.getElementById('breakTopZone');
+      const breakBotZone=document.getElementById('breakBotZone');
 
       if(startWorkMinutes===null){
         workStartMini.textContent='--:--';
         workEndMini.textContent='';
-        breakSumMini.textContent='';
-        breakCenter.textContent='';
+        breakTopZone.textContent='';
+        breakBotZone.textContent='';
         workBtn.classList.remove('overtime');
         renderWorkRoller(0);
         renderWheels(0);
@@ -1659,21 +1683,17 @@
         const totalBreak=getTotalBreakMinutes(true);
         workStartMini.textContent=formatHHMM(startWorkMinutes);
         workEndMini.textContent=endWorkMinutes!==null?formatHHMM(endWorkMinutes):'';
-        breakSumMini.textContent=totalBreak!==0?formatCompactSigned(totalBreak):'';
-        breakCenter.textContent=breakActive?formatCompact(getActiveBreakMinutes()):'';
+        // Suma przerw - górna 1/3 (jeśli >0 lub jeśli była korekta)
+        breakTopZone.textContent = totalBreak !== 0 ? formatCompactSigned(totalBreak) : '';
+        // Bieżąca przerwa - dolna 1/3 (tylko gdy aktywna)
+        breakBotZone.textContent = breakActive ? formatCompact(getActiveBreakMinutes()) : '';
         workBtn.classList.toggle('overtime', net>480);
         renderWorkRoller(Math.max(0,net));
         renderWheels(ex);
       }
 
       const breakBtn=document.getElementById('breakBtn');
-      breakBtn.classList.remove('on','has-data');
-      // Czy mamy jakieś dane na breakBtn? (suma >0 lub aktywna przerwa)
-      const breakHasData = (
-        (startWorkMinutes!==null) &&
-        (breakActive || getTotalBreakMinutes(true) !== 0)
-      );
-      if(breakHasData) breakBtn.classList.add('has-data');
+      breakBtn.classList.remove('on');
       if(endWorkMinutes===null && breakActive && blinkState){
         breakBtn.classList.add('on');
       }
@@ -1684,20 +1704,17 @@
     }
 
     // === Render kół (12 sztuk, każde = 5 minut) ===
-    // Stan: ile minut minęło od ostatnich ćwiczeń
-    // 0..5 → 12 kół, 5..10 → 11 kół, ... 55..60 → 1 koło
-    // 60+ → tryb "overage" (czerwony licznik nadwyżki minut, max 500min)
-    let _lastWheelsCount = 12;  // do animacji znikania
+    // wheels DOM zawiera wszystkie aktualnie widoczne (i znikające) koła.
+    // _wheelsState.count = ile kół ma być widocznych docelowo
+    let _wheelsState = { count: 12, initialized: false };
     function renderWheels(elapsedMinutes){
       const grid = document.getElementById('wheelsGrid');
       const exBtn = document.getElementById('exerciseBtn');
 
       if(!startWorkMinutes){
-        // Praca nieuruchomiona - pokazujemy 12 kół (stan początkowy)
         elapsedMinutes = 0;
       }
-
-      // Limit 500 minut - powyżej zatrzymujemy (porzucona aplikacja)
+      // Limit 500 minut - powyżej zatrzymujemy
       if(elapsedMinutes > 500) elapsedMinutes = 500;
 
       const wheelsLeft = Math.max(0, 12 - Math.floor(elapsedMinutes / 5));
@@ -1711,7 +1728,42 @@
       }
       exBtn.classList.remove('overage');
 
-      // Layout per liczba kół: ile kolumn × ile rzędów
+      // Pierwszy render: zbuduj 12 kół od razu
+      if(!_wheelsState.initialized){
+        buildWheelsGrid(wheelsLeft);
+        _wheelsState.count = wheelsLeft;
+        _wheelsState.initialized = true;
+        return;
+      }
+
+      // Jeśli liczba urosła (reset, klik) - rebuild
+      if(wheelsLeft > _wheelsState.count){
+        buildWheelsGrid(wheelsLeft);
+        _wheelsState.count = wheelsLeft;
+        return;
+      }
+      // Jeśli się nie zmieniła - nic nie rób
+      if(wheelsLeft === _wheelsState.count) return;
+
+      // Liczba zmalała - animuj znikanie pierwszych "diff" kół
+      const diff = _wheelsState.count - wheelsLeft;
+      _wheelsState.count = wheelsLeft;
+      // Pierwsze `diff` kół (od góry-lewej) dostają animację vanishing
+      const wheels = grid.querySelectorAll('.wheel:not(.vanishing)');
+      for(let i = 0; i < diff && i < wheels.length; i++){
+        wheels[i].classList.add('vanishing');
+      }
+      // Po zakończeniu animacji (3s) - rebuild w nowym layoucie
+      setTimeout(()=>{
+        // Sprawdź czy stan nie zmienił się w międzyczasie
+        if(_wheelsState.count === wheelsLeft){
+          buildWheelsGrid(wheelsLeft);
+        }
+      }, 3050);
+    }
+
+    function buildWheelsGrid(count){
+      const grid = document.getElementById('wheelsGrid');
       const layouts = {
         12: { cols:3, rows:4 },
         11: { cols:3, rows:4 },
@@ -1726,34 +1778,7 @@
         2:  { cols:2, rows:1 },
         1:  { cols:1, rows:1 }
       };
-      const lay = layouts[wheelsLeft] || { cols:3, rows:4 };
-      grid.style.gridTemplateColumns = `repeat(${lay.cols}, 1fr)`;
-      grid.style.gridTemplateRows = `repeat(${lay.rows}, 1fr)`;
-
-      // Buduj DOM jeśli liczba się zmienia
-      if(_lastWheelsCount !== wheelsLeft){
-        // Animacja znikania: pokaż wszystkie z _lastWheelsCount kół, oznacz różnicę jako vanishing
-        const diff = _lastWheelsCount - wheelsLeft;
-        if(diff > 0 && grid.children.length === _lastWheelsCount){
-          // Oznacz pierwsze `diff` kół jako vanishing
-          for(let i=0; i<diff; i++){
-            grid.children[i].classList.add('vanishing');
-          }
-          // Po 3s (czas animacji) - przerysuj siatkę z mniej kołami
-          setTimeout(()=>{
-            buildWheelsGrid(wheelsLeft, lay);
-            _lastWheelsCount = wheelsLeft;
-          }, 3000);
-          return;
-        }
-        // Jeśli liczba urosła (np. po reset / kliknięciu) lub pierwszy render - rebuild od razu
-        buildWheelsGrid(wheelsLeft, lay);
-        _lastWheelsCount = wheelsLeft;
-      }
-    }
-
-    function buildWheelsGrid(count, lay){
-      const grid = document.getElementById('wheelsGrid');
+      const lay = layouts[count] || { cols:3, rows:4 };
       grid.style.gridTemplateColumns = `repeat(${lay.cols}, 1fr)`;
       grid.style.gridTemplateRows = `repeat(${lay.rows}, 1fr)`;
       clearChildren(grid);
@@ -2958,7 +2983,7 @@
       lastExerciseMinutes=now;
       exerciseMarkers.push(now);
       // Reset stanu kół - następny render zbuduje 12 kół od nowa
-      _lastWheelsCount = 12;
+      _wheelsState = { count: 12, initialized: false };
       const b=document.getElementById('exerciseBtn');
       b.classList.remove('alert','blink','overage');
       b.classList.add('flash');
